@@ -1084,3 +1084,42 @@ a:hover { color: var(--gold-light); }
   #tour-body  { font-size: 15px; }
   .tour-icon  { font-size: 44px; }
 }
+
+/* ── Landscape on mobile / tablet ────────────────────────── */
+/* In landscape the screen is short — reduce nav and audio bar
+   heights so maximum space goes to the Qur'an text.          */
+@media (orientation: landscape) and (max-height: 500px) {
+  :root {
+    --nav-h:        48px;
+    --audio-bar-h:  54px;
+  }
+
+  .nav-logo-img     { width: 28px; height: 28px; }
+  .nav-brand-latin  { font-size: 13px; }
+  #nav-surah-btn    { padding: 5px 12px; font-size: 14px; }
+  .nav-surah-arabic { font-size: 16px; }
+
+  /* Surah header — more compact */
+  #surah-header     { padding: 14px 16px 12px; }
+  .surah-name-arabic{ font-size: 22px; }
+  #surah-name       { font-size: 14px; }
+  #surah-meaning,
+  #surah-meta,
+  #surah-counter    { display: none; }
+
+  /* Tighter ayah blocks */
+  .ayah-block       { padding: 16px 0; }
+  .ayah-number      { width: 34px; min-width: 34px; height: 34px; font-size: 11px; margin: 4px 12px 0 14px; }
+
+  /* Overview header — compact */
+  .overview-header  { padding: 14px 20px 12px; }
+  .overview-logo    { width: 40px; height: 40px; margin-bottom: 4px; }
+  .overview-title   { font-size: 16px; }
+  .overview-subtitle{ display: none; }
+
+  /* Tour card — fits in short landscape */
+  #tour-card        { padding: 24px 28px 20px; gap: 12px; }
+  .tour-icon        { font-size: 32px; }
+  #tour-title       { font-size: 16px; }
+  #tour-body        { font-size: 14px; }
+}
