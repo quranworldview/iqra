@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" data-arabic-size="md" data-trans-size="md" data-lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Iqra — Qur'an Reader</title>
+  <meta name="description" content="Iqra — A beautiful Qur'an reader with recitation and translation.">
+  <meta name="theme-color" content="#0D0F14">
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Iqra">
+  <meta name="application-name" content="Iqra">
+  <meta name="msapplication-TileColor" content="#0D0F14">
+  <meta name="msapplication-TileImage" content="icons/icon-192.png">
+  <link rel="stylesheet" href="css/design-system.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+
+<!-- ── Top Navigation ───────────────────────────────────── -->
+<nav id="mainNav">
+  <div class="nav-brand" onclick="showPage('overview')">
+    <img class="nav-logo-img theme-logo" src="icons/logo-iqra.png" alt="Iqra">
+    <span class="nav-brand-latin">Iqra</span>
+  </div>
+
+  <button id="nav-surah-btn" onclick="openSurahSelector()" aria-label="Select Surah">
+    <span id="nav-surah-arabic" class="nav-surah-arabic" lang="ar" dir="rtl">الْفَاتِحَة</span>
+    <span id="nav-surah-name" class="nav-surah-name">Al-Fatiha</span>
+    <span class="nav-dropdown-arrow">▾</span>
+  </button>
+
+  <div class="nav-right">
+    <button class="nav-icon-btn" onclick="toggleSettings()" aria-label="Settings">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+      </svg>
+    </button>
+  </div>
+</nav>
+
+<!-- ── Overview Page ─────────────────────────────────────── -->
+<div id="page-overview" class="page">
+  <div class="overview-header">
+    <img class="overview-logo theme-logo" src="icons/logo-iqra.png" alt="Iqra">
+    <div class="overview-title">Iqra</div>
+    <div class="overview-subtitle" data-i18n="app_tagline">Read. Listen. Reflect.</div>
+  </div>
+  <div id="overview-grid" role="list" aria-label="All surahs"></div>
+</div>
+
+<!-- ── Reader Page ───────────────────────────────────────── -->
+<div id="page-reader" class="page">
+  <header id="surah-header">
+    <button id="prev-surah-btn" class="surah-nav-arrow" onclick="prevSurah()" aria-label="Previous Surah">&#8592;</button>
+    <div class="surah-header-center">
+      <span id="surah-name-arabic" class="surah-name-arabic" lang="ar" dir="rtl">الْفَاتِحَة</span>
+      <span id="surah-name">Al-Fatiha</span>
+      <span id="surah-meaning">The Opening</span>
+      <span id="surah-meta">Makkan · 7 ayahs</span>
+      <span id="surah-counter">1 / 114</span>
+    </div>
+    <button id="next-surah-btn" class="surah-nav-arrow" onclick="nextSurah()" aria-label="Next Surah">&#8594;</button>
+  </header>
+  <main id="ayah-container" role="main"></main>
+</div>
+
+<!-- ── Bottom Nav ────────────────────────────────────────── -->
+<div id="bottomNav">
+  <button class="bottom-nav-btn active-page" data-page="overview" onclick="showPage('overview')">
+    <span class="bnb-icon">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+        <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+      </svg>
+    </span>
+    <span class="bnb-label" data-i18n="overview">Overview</span>
+  </button>
+
+  <div id="audio-bar">
+    <button class="audio-btn-secondary"
+            onclick="Reader._playSingleAyah(Math.max(1, Reader.state.currentAyah - 1))"
+            aria-label="Previous ayah">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5"/>
+      </svg>
+    </button>
+    <button id="play-btn" onclick="Reader.toggleSurahPlay()" aria-label="Play surah">
+      <span id="play-waveform" class="waveform" aria-hidden="true">
+        <span class="wv-bar"></span><span class="wv-bar"></span><span class="wv-bar"></span>
+        <span class="wv-bar"></span><span class="wv-bar"></span>
+      </span>
+      <span id="play-label" data-i18n="play_surah">Play Surah</span>
+    </button>
+    <button class="audio-btn-secondary"
+            onclick="Reader._playSingleAyah(Math.min(Reader.state.ayahs.length, Reader.state.currentAyah + 1))"
+            aria-label="Next ayah">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/>
+      </svg>
+    </button>
+  </div>
+
+  <button class="bottom-nav-btn" data-page="reader" onclick="showPage('reader')">
+    <span class="bnb-icon">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+      </svg>
+    </span>
+    <span class="bnb-label" data-i18n="reader">Reader</span>
+  </button>
+</div>
+
+<!-- ── Settings Panel ────────────────────────────────────── -->
+<div class="settings-backdrop" id="settings-backdrop" onclick="closeSettings()"></div>
+<aside id="settings-panel" role="dialog" aria-label="Settings">
+  <div class="settings-panel-header">
+    <span class="settings-panel-title" data-i18n="settings">Settings</span>
+    <button class="nav-icon-btn" onclick="closeSettings()" aria-label="Close">✕</button>
+  </div>
+
+  <div>
+    <div class="settings-section-title" data-i18n="theme">Theme</div>
+    <div class="settings-btn-group">
+      <button class="settings-btn" data-theme-btn="dark"  onclick="setTheme('dark')"  data-i18n="theme_dark">Dark</button>
+      <button class="settings-btn" data-theme-btn="light" onclick="setTheme('light')" data-i18n="theme_light">Light</button>
+    </div>
+  </div>
+
+  <div>
+    <div class="settings-section-title" data-i18n="arabic_size">Arabic Size</div>
+    <div class="size-btn-group">
+      <button class="size-btn" data-arabic-size-btn="xs"  onclick="setArabicSize('xs')">XS</button>
+      <button class="size-btn" data-arabic-size-btn="sm"  onclick="setArabicSize('sm')">S</button>
+      <button class="size-btn" data-arabic-size-btn="md"  onclick="setArabicSize('md')">M</button>
+      <button class="size-btn" data-arabic-size-btn="lg"  onclick="setArabicSize('lg')">L</button>
+      <button class="size-btn" data-arabic-size-btn="xl"  onclick="setArabicSize('xl')">XL</button>
+      <button class="size-btn" data-arabic-size-btn="2xl" onclick="setArabicSize('2xl')">2XL</button>
+    </div>
+  </div>
+
+  <div>
+    <div class="settings-section-title" data-i18n="trans_size">Translation Size</div>
+    <div class="size-btn-group">
+      <button class="size-btn" data-trans-size-btn="xs"  onclick="setTransSize('xs')">XS</button>
+      <button class="size-btn" data-trans-size-btn="sm"  onclick="setTransSize('sm')">S</button>
+      <button class="size-btn" data-trans-size-btn="md"  onclick="setTransSize('md')">M</button>
+      <button class="size-btn" data-trans-size-btn="lg"  onclick="setTransSize('lg')">L</button>
+      <button class="size-btn" data-trans-size-btn="xl"  onclick="setTransSize('xl')">XL</button>
+      <button class="size-btn" data-trans-size-btn="2xl" onclick="setTransSize('2xl')">2XL</button>
+    </div>
+  </div>
+
+  <div>
+    <div class="settings-section-title" data-i18n="language">Language</div>
+    <div class="settings-btn-group">
+      <button class="settings-btn settings-lang-btn" data-lang-btn="en" onclick="setLang('en')">English</button>
+      <button class="settings-btn settings-lang-btn" data-lang-btn="ur" onclick="setLang('ur')">اردو</button>
+      <button class="settings-btn settings-lang-btn" data-lang-btn="hi" onclick="setLang('hi')">हिंदी</button>
+    </div>
+  </div>
+
+  <!-- Tour button — always at bottom of settings -->
+  <button class="settings-tour-btn" onclick="Tour.open()">
+    <span class="settings-tour-icon">i</span>
+    <span>App Guide &amp; Tour</span>
+  </button>
+</aside>
+
+<!-- ── Surah Selector Modal ──────────────────────────────── -->
+<div id="surah-modal" role="dialog" aria-modal="true" aria-label="Select Surah">
+  <div class="surah-modal-box">
+    <div class="surah-modal-header">
+      <span class="surah-modal-title" data-i18n="select_surah">Select Surah</span>
+      <input type="search" id="surah-search" class="surah-search-input"
+             placeholder="Search by name or number…"
+             autocomplete="off" autocorrect="off" spellcheck="false">
+      <button class="modal-close-btn" onclick="closeSurahSelector()" aria-label="Close">✕</button>
+    </div>
+    <div class="goto-ayah-row">
+      <span class="goto-ayah-label" data-i18n="goto_ayah">Go to Ayah</span>
+      <input type="number" id="ayah-goto-input" class="goto-ayah-input"
+             placeholder="Ayah number…" min="1" max="286">
+      <button class="goto-ayah-btn" onclick="gotoAyah()">Go</button>
+    </div>
+    <div class="surah-modal-subtitle">114 Surahs</div>
+    <div id="surah-list" role="listbox"></div>
+  </div>
+</div>
+
+<!-- ── Guided Tour Modal ──────────────────────────────────── -->
+<div id="tour-modal" role="dialog" aria-modal="true" aria-label="App Guide">
+  <div id="tour-card">
+    <button class="tour-skip" onclick="Tour.close()">Skip tour</button>
+
+    <span class="tour-icon" id="tour-icon">📖</span>
+    <h2 id="tour-title"></h2>
+    <p id="tour-body"></p>
+
+    <div id="tour-dots"></div>
+    <div id="tour-counter"></div>
+
+    <div class="tour-nav">
+      <button id="tour-prev-btn" onclick="Tour.prev()">← Back</button>
+      <button id="tour-next-btn" onclick="Tour.next()">Next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Scripts ───────────────────────────────────────────── -->
+<script src="js/data/surahs.js"></script>
+<script src="js/services/store.js"></script>
+<script src="js/services/quran-api.js"></script>
+<script src="js/core/theme.js"></script>
+<script src="js/core/i18n.js"></script>
+<script src="js/core/settings.js"></script>
+<script src="js/pages/overview.js"></script>
+<script src="js/pages/reader.js"></script>
+<script src="js/pages/tour.js"></script>
+<script src="app.js"></script>
+
+<!-- Service Worker Registration -->
+<script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("./sw.js")
+        .then(reg => {
+          // Check for updates every time the app loads
+          reg.update();
+          // When a new SW is waiting, reload to activate it
+          reg.addEventListener("updatefound", () => {
+            const newWorker = reg.installing;
+            newWorker.addEventListener("statechange", () => {
+              if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
+                // New version available — reload silently
+                navigator.serviceWorker.addEventListener("controllerchange", () => {
+                  window.location.reload();
+                });
+                newWorker.postMessage({ type: "SKIP_WAITING" });
+              }
+            });
+          });
+        })
+        .catch(err => console.warn("SW registration failed:", err));
+    });
+  }
+</script>
+
+</body>
+</html>

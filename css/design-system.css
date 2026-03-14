@@ -1,0 +1,124 @@
+/* ============================================================
+   IQRA — DESIGN SYSTEM
+   Tokens only. No layout. No components.
+   JS sets data-theme / data-arabic-size / data-trans-size / data-lang on <html>.
+   CSS does everything else from there.
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400&family=Noto+Nastaliq+Urdu:wght@400;500;600&family=Noto+Sans+Devanagari:wght@400;500&display=swap');
+
+/* KFGQPC Uthmanic Script HAFS — self-hosted */
+@font-face {
+  font-family: 'KFGQPC Uthmanic Script HAFS';
+  src: url('../fonts/KFGQPCUthmanicScriptHAFS.woff2') format('woff2'),
+       url('../fonts/KFGQPCUthmanicScriptHAFS.otf')   format('opentype');
+  font-weight: normal;
+  font-style:  normal;
+  font-display: block;
+}
+
+/* ── Dark mode (default) ──────────────────────────────────── */
+:root {
+  --bg-base:        #0D0F14;
+  --bg-surface:     #13161E;
+  --bg-elevated:    #1A1E2A;
+  --border:         rgba(180, 150, 80, 0.15);
+  --border-strong:  rgba(180, 150, 80, 0.35);
+  --gold:           #F0C060;
+  --gold-light:     #FFD97A;
+  --gold-dim:       rgba(240, 192, 96, 0.18);
+  --text-primary:   #F0EDE4;
+  --text-secondary: #A09880;
+  --text-tertiary:  #5C5748;
+  --text-arabic:    #F5F0E8;
+  --teal:           #3A7D7B;
+  --teal-light:     #4E9E9C;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --shadow-card: 0 4px 32px rgba(0,0,0,0.45);
+  --shadow-glow: 0 0 40px rgba(240,192,96,0.10);
+  --hatch-line: rgba(240,192,96,0.055);
+  --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --nav-h:        60px;
+  --audio-bar-h:  68px;
+
+  /* ── Arabic text size scale (independent) ──────────────── */
+  /* xs → 2xl: 6 steps for weak eyesight support             */
+  --sz-arabic: 38px;   /* default = md */
+
+  /* ── Translation text size scale (independent) ─────────── */
+  --sz-translation: 20px;  /* default = md */
+
+  /* Other UI sizes — fixed */
+  --sz-body:    16px;
+  --sz-ui:      14px;
+}
+
+/* ── Light mode ───────────────────────────────────────────── */
+[data-theme="light"] {
+  --bg-base:        #F5F0E8;
+  --bg-surface:     #EDE8DE;
+  --bg-elevated:    #E4DDD0;
+  --border:         rgba(100, 80, 40, 0.18);
+  --border-strong:  rgba(100, 80, 40, 0.38);
+  --gold:           #A0720A;
+  --gold-light:     #B8860B;
+  --gold-dim:       rgba(160, 114, 10, 0.12);
+  --text-primary:   #1A1710;
+  --text-secondary: #4A4438;
+  --text-tertiary:  #8A7A68;
+  --text-arabic:    #0D0B08;
+  --teal:           #2A6060;
+  --teal-light:     #3A7D7B;
+  --shadow-card: 0 4px 24px rgba(0,0,0,0.12);
+  --shadow-glow: 0 0 30px rgba(160,114,10,0.08);
+  --hatch-line: rgba(100,80,40,0.07);
+}
+
+/* ── Arabic size steps ────────────────────────────────────── */
+[data-arabic-size="xs"] { --sz-arabic: 26px; }
+[data-arabic-size="sm"] { --sz-arabic: 32px; }
+[data-arabic-size="md"] { --sz-arabic: 38px; }
+[data-arabic-size="lg"] { --sz-arabic: 46px; }
+[data-arabic-size="xl"] { --sz-arabic: 56px; }
+[data-arabic-size="2xl"]{ --sz-arabic: 68px; }
+
+/* ── Translation size steps ───────────────────────────────── */
+[data-trans-size="xs"] { --sz-translation: 14px; }
+[data-trans-size="sm"] { --sz-translation: 17px; }
+[data-trans-size="md"] { --sz-translation: 20px; }
+[data-trans-size="lg"] { --sz-translation: 24px; }
+[data-trans-size="xl"] { --sz-translation: 29px; }
+[data-trans-size="2xl"]{ --sz-translation: 34px; }
+
+/* ── Language-specific Urdu scaling ──────────────────────── */
+[data-lang="ur"] .ayah-translation { line-height: 2.5; }
+[data-lang="hi"] .ayah-translation { line-height: 2.0; }
+
+/* ── Arabic text shaping — applies everywhere ────────────── */
+[lang="ar"],
+.ayah-arabic,
+.bismillah-ornament,
+.surah-name-arabic,
+.surah-item-arabic,
+.nav-surah-arabic,
+.overview-surah-arabic {
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "calt" 1, "liga" 1, "rlig" 1, "mset" 1;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Translation font + direction per language ────────────── */
+[data-lang="ur"] .ayah-translation,
+[data-lang="ur"] .translation {
+  font-family: 'Noto Nastaliq Urdu', serif;
+  direction: rtl;
+  text-align: right;
+}
+
+[data-lang="hi"] .ayah-translation,
+[data-lang="hi"] .translation {
+  font-family: 'Noto Sans Devanagari', sans-serif;
+  direction: ltr;
+}
