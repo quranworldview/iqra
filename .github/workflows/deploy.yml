@@ -1,0 +1,56 @@
+# ============================================================
+# GitHub Actions — Iqra Qur'an Reader
+#
+# Triggers on every push to main branch.
+# 1. Auto-bumps APP_VERSION in sw.js (timestamp-based)
+# 2. Deploys to GitHub Pages
+#
+# Setup (one time only):
+#   GitHub repo → Settings → Pages → Source: GitHub Actions
+# ============================================================
+
+name: Deploy Iqra to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:  # Allow manual trigger from GitHub UI
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Bump SW version
+        run: |
+          VERSION="iqra-v$(date +%Y%m%d-%H%M)"
+          sed -i "s/const APP_VERSION = '[^']*'/const APP_VERSION = '$VERSION'/" sw.js
+          echo "Bumped to $VERSION"
+          cat sw.js | grep APP_VERSION
+
+      - name: Setup GitHub Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload to Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
