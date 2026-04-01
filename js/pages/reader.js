@@ -1,12 +1,12 @@
 // ============================================================
-// READER — Iqra Qur'an Reader
-//
-// Audio rules:
-//   1. Switching surah always stops audio — no bleed-over.
-//   2. Surah ends → stop. No auto-advance to next surah.
-//   3. toggleSurahPlay always starts/resumes FULL SURAH mode
-//      from currentAyah — never single-ayah mode.
-//   4. Tapping an ayah number plays that single ayah only.
+// READER — Iqra V2
+// New in V2:
+//   - Reading mode (Arabic only, full width, centered)
+//   - ۝ ayah end markers (always shown, like a Mushaf)
+//   - ۩ Sajdah markers on the 15 sajdah ayahs
+//   - Juz dividers shown inline as you scroll
+//   - Bookmark icon on each ayah (long-press or icon tap)
+//   - Reciter-aware audio URLs
 // ============================================================
 
 const Reader = {
@@ -15,7 +15,7 @@ const Reader = {
     ayahs:       [],
     currentAyah: 1,
     isPlaying:   false,
-    playMode:    'idle',  // 'idle' | 'surah' | 'single'
+    playMode:    'idle',
     audio:       null,
     playQueue:   [],
     loading:     false,
@@ -29,13 +29,14 @@ const Reader = {
     await this.loadSurah(lastSurah);
   },
 
-  // ── Load surah ────────────────────────────────────────────
   async loadSurah(num, startAyah) {
     if (num < 1 || num > 114) return;
-
-    // FIX 1: Always stop audio when switching surah
+    // Save current position before switching to a new surah
+    if (this.state.surahNum && this.state.currentAyah) {
+      saveLastSurah(this.state.surahNum);
+      saveLastAyah(this.state.surahNum, this.state.currentAyah);
+    }
     this._stopAudio();
-
     this.state.surahNum = num;
     this.state.loading  = true;
     this.state.error    = null;
@@ -50,10 +51,25 @@ const Reader = {
       const ayahs = await fetchSurah(num);
       this.state.ayahs   = ayahs;
       this.state.loading = false;
-      const target = startAyah || loadLastAyah(num);
-      this.state.currentAyah = Math.min(target, ayahs.length);
+      // If caller passed startAyah=1 (e.g. from Overview tile tap) BUT the surah
+      // is already marked complete, honour the explicit scroll-to-start but do NOT
+      // overwrite the saved lastAyah so the completion record is preserved.
+      const savedAyah = loadLastAyah(num);
+      const surahComplete = isSurahCompleted(num); // timestamp-based, never cleared
+      let target;
+      if (startAyah && startAyah === 1 && surahComplete) {
+        // User tapped a completed surah from Overview — start at top visually
+        // but keep savedAyah intact in memory so _savePosition doesn't regress it
+        target = 1;
+        this.state.currentAyah = 1;
+        // Re-stamp the full completion so localStorage stays correct
+        saveLastAyah(num, getSurahMeta(num).ayahs);
+      } else {
+        target = startAyah || savedAyah;
+        this.state.currentAyah = Math.min(target, ayahs.length);
+      }
       this.renderAyahs();
-      this._scrollToAyah(this.state.currentAyah, 'instant');
+      this._scrollToAyah(target, 'instant');
       prefetchSurah(num - 1);
       prefetchSurah(num + 1);
     } catch (err) {
@@ -79,8 +95,36 @@ const Reader = {
       container.appendChild(bism);
     }
 
-    this.state.ayahs.forEach(ayah => container.appendChild(this._buildAyahEl(ayah)));
+    this.state.ayahs.forEach((ayah, idx) => {
+      // Juz divider before this ayah?
+      const juzDivider = this._getJuzDivider(this.state.surahNum, ayah.num);
+      if (juzDivider) container.appendChild(juzDivider);
+
+      container.appendChild(this._buildAyahEl(ayah));
+    });
+
     this._highlightAyah(this.state.currentAyah);
+  },
+
+  _getJuzDivider(surahNum, ayahNum) {
+    // Show a Juz divider when a new Juz starts at this ayah
+    // (except Juz 1 which is always the beginning)
+    const juzEntry = JUZ.find(j => j.num > 1 && j.surah === surahNum && j.ayah === ayahNum);
+    if (!juzEntry) return null;
+
+    const div = document.createElement('div');
+    div.className = 'juz-divider';
+    const label = currentLang === 'ur' ? 'پارہ ' + juzEntry.num :
+                  currentLang === 'hi' ? 'पारा ' + juzEntry.num :
+                  'Juz ' + juzEntry.num;
+    div.innerHTML = `
+      <span class="juz-divider-line"></span>
+      <span class="juz-divider-label">
+        <span class="juz-divider-arabic" lang="ar" dir="rtl">${juzEntry.nameAr}</span>
+        <span class="juz-divider-text">${label}</span>
+      </span>
+      <span class="juz-divider-line"></span>`;
+    return div;
   },
 
   _buildAyahEl(ayah) {
@@ -89,30 +133,106 @@ const Reader = {
     div.id = 'ayah-' + ayah.num;
     div.dataset.num = ayah.num;
 
+    const isSajdahAyah = isSajdah(this.state.surahNum, ayah.num);
+    const bmActive = isBookmarked(this.state.surahNum, ayah.num);
+
+    // ── Ayah number medallion ─────────────────────────────
+    const numWrap = document.createElement('div');
+    numWrap.className = 'ayah-num-wrap';
+
     const numEl = document.createElement('div');
     numEl.className = 'ayah-number';
     numEl.textContent = ayah.num;
     numEl.title = 'Play ayah ' + ayah.num;
     numEl.addEventListener('click', () => this._playSingleAyah(ayah.num));
-    div.appendChild(numEl);
+    numWrap.appendChild(numEl);
 
+    // Sajdah badge
+    if (isSajdahAyah) {
+      const badge = document.createElement('div');
+      badge.className = 'sajdah-badge';
+      badge.title = t('sajdah');
+      badge.textContent = '۩';
+      numWrap.appendChild(badge);
+    }
+
+    // Bookmark icon
+    const bmIcon = document.createElement('button');
+    bmIcon.className = 'ayah-bookmark-btn' + (bmActive ? ' active' : '');
+    bmIcon.innerHTML = bmActive ? '🔖' : '🕮';
+    bmIcon.title = bmActive ? 'Bookmarked — click to update' : 'Bookmark this ayah';
+    bmIcon.setAttribute('aria-label', 'Bookmark ayah ' + ayah.num);
+    bmIcon.addEventListener('click', e => {
+      e.stopPropagation();
+      Bookmarks.openSheet(this.state.surahNum, ayah.num, ayah.arabic);
+    });
+    numWrap.appendChild(bmIcon);
+
+    div.appendChild(numWrap);
+
+    // ── Text content ──────────────────────────────────────
     const textDiv = document.createElement('div');
     textDiv.className = 'ayah-text';
+
+    // Arabic text — use indopak text + font when script=indopak,
+    // uthmani text + KFGQPC font otherwise.
+    const script = document.documentElement.getAttribute('data-script') || 'indopak';
+    let arabicText = (script === 'indopak' && ayah.arabic_indopak)
+      ? ayah.arabic_indopak
+      : ayah.arabic;
+
+    // Strip end-of-ayah and waqf markers from indopak_nastaleeq API text.
+    // The API uses U+06DF (۟) as end marker, sometimes followed by
+    // U+0615 (ؕ waqf lazim), U+065A (ٚ), and other pause signs U+06D6-U+06DC.
+    // We render our own styled ⊙ marker so strip all of these.
+    arabicText = arabicText
+      .replace(/[\u06DF\u06D6-\u06DC\u065A\u06E9]+$/g, '') // strip end markers
+      .replace(/\u06DD[\u0660-\u0669\u06F0-\u06F9]*/g, '')  // strip U+06DD ayah marker
+      .replace(/[\uF500-\uF5FF]/g, '')  // strip ALL PUA glyphs — white circles, ornaments
+      .trim();
 
     const arabicEl = document.createElement('div');
     arabicEl.className = 'ayah-arabic';
     arabicEl.setAttribute('lang', 'ar');
     arabicEl.setAttribute('dir', 'rtl');
-    arabicEl.textContent = ayah.arabic;
+
+    const markerSpan = document.createElement('span');
+    markerSpan.className = 'ayah-end-marker';
+    markerSpan.setAttribute('aria-hidden', 'true');
+    markerSpan.textContent = this._toArabicNumerals(ayah.num);
+
+    // Marker inline at the START of the text (RTL: visually on the right)
+    arabicEl.appendChild(document.createTextNode(arabicText));
+    arabicEl.appendChild(markerSpan);
     textDiv.appendChild(arabicEl);
 
+    // Translation (hidden in reading mode via CSS)
     const transEl = document.createElement('div');
     transEl.className = 'ayah-translation translation';
     transEl.textContent = getAyahTranslation(ayah);
     textDiv.appendChild(transEl);
 
     div.appendChild(textDiv);
+
+    // Long-press to bookmark (touch)
+    let _pressTimer = null;
+    div.addEventListener('touchstart', () => {
+      _pressTimer = setTimeout(() => {
+        const _bScript = document.documentElement.getAttribute('data-script') || 'indopak';
+      const _bText = (_bScript === 'indopak' && ayah.arabic_indopak) ? ayah.arabic_indopak : ayah.arabic;
+      Bookmarks.openSheet(this.state.surahNum, ayah.num, _bText);
+      }, 600);
+    }, { passive: true });
+    div.addEventListener('touchend',   () => clearTimeout(_pressTimer), { passive: true });
+    div.addEventListener('touchmove',  () => clearTimeout(_pressTimer), { passive: true });
+
     return div;
+  },
+
+  // Convert Western numerals to Arabic-Indic (U+0660–U+0669) for ۝ marker
+  // These digits render INSIDE the U+06DD ornament in KFGQPC font
+  _toArabicNumerals(n) {
+    return String(n).replace(/[0-9]/g, d => String.fromCharCode(0x0660 + parseInt(d)));
   },
 
   _refreshTranslations() {
@@ -121,6 +241,19 @@ const Reader = {
       if (!block) return;
       const el = block.querySelector('.ayah-translation');
       if (el) el.textContent = getAyahTranslation(ayah);
+    });
+  },
+
+  _refreshBookmarkIcons() {
+    this.state.ayahs.forEach(ayah => {
+      const block = document.getElementById('ayah-' + ayah.num);
+      if (!block) return;
+      const btn = block.querySelector('.ayah-bookmark-btn');
+      if (!btn) return;
+      const bm = isBookmarked(this.state.surahNum, ayah.num);
+      btn.classList.toggle('active', bm);
+      btn.innerHTML = bm ? '🔖' : '🕮';
+      btn.title = bm ? 'Bookmarked — click to update' : 'Bookmark this ayah';
     });
   },
 
@@ -154,8 +287,7 @@ const Reader = {
     if (n) n.disabled = num >= 114;
   },
 
-  // ── Audio: single ayah ────────────────────────────────────
-  // Tapping the ayah number medallion → play that one ayah only.
+  // ── Audio ────────────────────────────────────────────────
   _playSingleAyah(ayahNum) {
     this._stopAudio();
     this.state.playMode    = 'single';
@@ -166,19 +298,12 @@ const Reader = {
     this._playUrl(getAudioUrl(this.state.surahNum, ayahNum));
   },
 
-  // ── Audio: full surah ─────────────────────────────────────
-  // FIX 3: toggleSurahPlay always operates in surah mode.
-  // - If playing → pause
-  // - If paused mid-surah → resume
-  // - If idle → start full surah from currentAyah
   toggleSurahPlay() {
     if (this.state.isPlaying) {
       this._pauseAudio();
     } else if (this.state.playMode === 'surah' && this.state.playQueue.length > 0) {
-      // Resume surah from where we paused
       this._resumeAudio();
     } else {
-      // Always start full surah — even if last action was single-ayah
       this._startSurahPlay(this.state.currentAyah || 1);
     }
   },
@@ -194,8 +319,7 @@ const Reader = {
 
   _playNextInQueue() {
     if (this.state.playQueue.length === 0) {
-      // FIX 2: Surah ends → stop. No auto-advance to next surah.
-      this._stopAudio();
+      this._stopAudio(); // End of surah — stop cleanly
       return;
     }
     const ayahNum = this.state.playQueue.shift();
@@ -208,11 +332,16 @@ const Reader = {
 
   _bindAudioEvents() {
     const audio = this.state.audio;
-    audio.addEventListener('ended', () => {
+    audio.addEventListener('ended',  () => {
       if (this.state.playMode === 'surah') this._playNextInQueue();
       else this._stopAudio();
     });
-    audio.addEventListener('error',  () => this._stopAudio());
+    audio.addEventListener('error',  () => {
+      // Only show error if we were actually trying to play something
+      if (!this.state.isPlaying && this.state.playMode === 'idle') return;
+      this._stopAudio();
+      showToast('⚠ Audio unavailable — check your connection');
+    });
     audio.addEventListener('play',   () => { this.state.isPlaying = true;  this._updatePlayBtn(true);  });
     audio.addEventListener('pause',  () => { this.state.isPlaying = false; this._updatePlayBtn(false); });
   },
@@ -228,8 +357,12 @@ const Reader = {
 
   _stopAudio() {
     const audio = this.state.audio;
-    if (audio && !audio.paused) audio.pause();
-    if (audio) audio.src = '';
+    if (!audio) return;
+    if (!audio.paused) audio.pause();
+    // removeAttribute + load() is the correct way to reset Audio —
+    // setting src='' triggers an "Invalid URI" console warning and error event.
+    audio.removeAttribute('src');
+    audio.load(); // resets internal state, fires no error, no console noise
     this.state.isPlaying  = false;
     this.state.playMode   = 'idle';
     this.state.playQueue  = [];
@@ -283,7 +416,6 @@ const Reader = {
 };
 
 // ── Surah Selector Modal ───────────────────────────────────
-
 function openSurahSelector() {
   const modal = document.getElementById('surah-modal');
   if (!modal) return;

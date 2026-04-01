@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark" data-arabic-size="md" data-trans-size="md" data-lang="en">
+<html lang="en" data-theme="dark" data-arabic-size="md" data-trans-size="md" data-lang="en" data-script="indopak">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,7 +8,9 @@
   <meta name="theme-color" content="#0D0F14">
   <!-- PWA -->
   <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/x-icon" href="icons/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="64x64" href="icons/favicon-64.png">
   <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -25,16 +27,14 @@
 <!-- ── Top Navigation ───────────────────────────────────── -->
 <nav id="mainNav">
   <div class="nav-brand" onclick="showPage('overview')">
-    <img class="nav-logo-img theme-logo" src="icons/logo-iqra.png" alt="Iqra">
+    <img class="nav-logo-img theme-logo" src="icons/logo-dark.png" alt="Iqra">
     <span class="nav-brand-latin">Iqra</span>
   </div>
-
   <button id="nav-surah-btn" onclick="openSurahSelector()" aria-label="Select Surah">
     <span id="nav-surah-arabic" class="nav-surah-arabic" lang="ar" dir="rtl">الْفَاتِحَة</span>
     <span id="nav-surah-name" class="nav-surah-name">Al-Fatiha</span>
     <span class="nav-dropdown-arrow">▾</span>
   </button>
-
   <div class="nav-right">
     <button class="nav-icon-btn" onclick="toggleSettings()" aria-label="Settings">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -48,11 +48,28 @@
 <!-- ── Overview Page ─────────────────────────────────────── -->
 <div id="page-overview" class="page">
   <div class="overview-header">
-    <img class="overview-logo theme-logo" src="icons/logo-iqra.png" alt="Iqra">
+    <img class="overview-logo theme-logo" src="icons/logo-dark.png" alt="Iqra">
     <div class="overview-title">Iqra</div>
     <div class="overview-subtitle" data-i18n="app_tagline">Read. Listen. Reflect.</div>
   </div>
-  <div id="overview-grid" role="list" aria-label="All surahs"></div>
+
+  <!-- Surah / Juz toggle -->
+  <div class="view-toggle">
+    <button class="view-toggle-btn active" data-view-btn="surah"
+            onclick="Overview.setViewMode('surah')" data-i18n="surah_view">Surahs</button>
+    <button class="view-toggle-btn" data-view-btn="juz"
+            onclick="Overview.setViewMode('juz')" data-i18n="juz_view">Juz</button>
+  </div>
+
+  <!-- Favourites -->
+  <div id="favourites-section">
+    <div class="favourites-label" data-i18n="favourites">Favourites</div>
+    <div id="favourites-grid"></div>
+    <div id="favourites-empty" style="display:none;" data-i18n="no_fav_body">Tap the ♡ on any Surah to add it here.</div>
+  </div>
+
+  <div class="all-surahs-label" data-i18n="surah_view">Surahs</div>
+  <div id="overview-grid" role="list"></div>
 </div>
 
 <!-- ── Reader Page ───────────────────────────────────────── -->
@@ -68,7 +85,27 @@
     </div>
     <button id="next-surah-btn" class="surah-nav-arrow" onclick="nextSurah()" aria-label="Next Surah">&#8594;</button>
   </header>
+
+  <!-- Reading mode toggle -->
+  <div class="reader-controls-bar">
+    <button id="reading-mode-btn" onclick="toggleReadingMode()" aria-label="Toggle reading mode">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+      </svg>
+      <span class="rm-label" data-i18n="reading_mode_off">Off</span>
+    </button>
+  </div>
+
   <main id="ayah-container" role="main"></main>
+</div>
+
+<!-- ── Bookmarks Page ────────────────────────────────────── -->
+<div id="page-bookmarks" class="page">
+  <div class="bookmarks-header">
+    <div class="bookmarks-title" data-i18n="bookmarks">Bookmarks</div>
+    <div class="bookmarks-subtitle" id="bookmarks-subtitle"></div>
+  </div>
+  <div id="bookmarks-list"></div>
 </div>
 
 <!-- ── Bottom Nav ────────────────────────────────────────── -->
@@ -115,6 +152,11 @@
     </span>
     <span class="bnb-label" data-i18n="reader">Reader</span>
   </button>
+
+  <button class="bottom-nav-btn" data-page="bookmarks" onclick="showPage('bookmarks')">
+    <span class="bnb-icon">🔖</span>
+    <span class="bnb-label" data-i18n="bookmarks">Bookmarks</span>
+  </button>
 </div>
 
 <!-- ── Settings Panel ────────────────────────────────────── -->
@@ -123,6 +165,98 @@
   <div class="settings-panel-header">
     <span class="settings-panel-title" data-i18n="settings">Settings</span>
     <button class="nav-icon-btn" onclick="closeSettings()" aria-label="Close">✕</button>
+  </div>
+
+  <!-- Profile Card — name, goal, streak, achievements all in one clean card -->
+  <div class="profile-card">
+
+    <!-- Guest banner — shown when not signed in -->
+    <div id="profile-guest-banner" class="profile-guest-banner" style="display:none">
+      <div class="profile-guest-text">
+        <span class="profile-guest-icon">☁️</span>
+        <span id="profile-guest-msg"></span>
+      </div>
+      <button class="profile-guest-btn" onclick="Auth.openModal('signin')"></button>
+    </div>
+
+    <!-- Signed-in card — shown when signed in -->
+    <div id="profile-signedin-card" class="profile-signedin-card" style="display:none">
+      <div class="profile-signedin-info">
+        <span class="profile-signedin-synced"></span>
+        <span id="profile-signedin-email" class="profile-signedin-email"></span>
+      </div>
+      <button class="profile-signout-btn" onclick="Auth.signOut()"></button>
+    </div>
+
+    <!-- Name row at top -->
+    <div id="profile-name-row" class="profile-name-row">
+      <!-- Guest: editable name input -->
+      <div id="profile-name-edit" style="display:flex;align-items:center;gap:8px;width:100%">
+        <input type="text" id="profile-name-input" class="profile-name-input"
+               placeholder="Your name…" maxlength="30"
+               onkeydown="if(event.key==='Enter') Profile.saveName()">
+        <button class="profile-name-save" onclick="Profile.saveName()">✓</button>
+      </div>
+      <!-- Signed-in: read-only name display -->
+      <div id="profile-name-display" style="display:none;width:100%">
+        <span id="profile-name-text" class="profile-name-text"></span>
+      </div>
+    </div>
+
+    <!-- Greeting -->
+    <div class="profile-greeting" id="profile-greeting">Assalamu Alaikum</div>
+
+    <!-- Stats row -->
+    <div class="profile-stats">
+      <div class="profile-stat">
+        <span class="profile-stat-icon">🔥</span>
+        <div class="profile-stat-text">
+          <span id="profile-streak">0</span>
+          <span class="profile-stat-label" data-i18n="streak">Day Streak</span>
+        </div>
+      </div>
+      <div class="profile-stat">
+        <span class="profile-stat-icon">🏆</span>
+        <div class="profile-stat-text">
+          <span id="profile-streak-longest">0</span>
+          <span class="profile-stat-label" data-i18n="streak_longest">Best Streak</span>
+        </div>
+      </div>
+      <div class="profile-stat">
+        <span class="profile-stat-icon">📖</span>
+        <div class="profile-stat-text">
+          <span id="profile-surahs-done">0 / 114</span>
+          <span class="profile-stat-label" data-i18n="surahs_read">surahs read</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Goal progress -->
+    <div class="profile-goal-section">
+      <div class="profile-goal-header">
+        <div class="profile-goal-input-compact">
+          <input type="number" id="profile-goal-count" class="profile-number-input-sm"
+                 min="1" max="114" value="5">
+          <span class="profile-goal-sep" data-i18n="surahs_goal">surahs</span>
+          <select id="profile-goal-period" class="profile-select-sm">
+            <option value="day" data-i18n="per_day">/ day</option>
+            <option value="week" selected data-i18n="per_week">/ week</option>
+            <option value="month" data-i18n="per_month">/ month</option>
+          </select>
+          <button class="profile-goal-set" onclick="Profile.saveGoal()">Set</button>
+        </div>
+        <span id="profile-goal-badge" class="profile-goal-badge" style="display:none">🏅</span>
+      </div>
+      <div class="profile-goal-track">
+        <div class="profile-goal-bar" id="profile-goal-bar"></div>
+      </div>
+      <span id="profile-goal-label" class="profile-goal-label"></span>
+    </div>
+
+    <!-- Achievements -->
+    <div class="profile-ach-title" data-i18n="achievements">Achievements</div>
+    <div id="profile-achievements" class="profile-achievements"></div>
+
   </div>
 
   <div>
@@ -166,7 +300,95 @@
     </div>
   </div>
 
-  <!-- Tour button — always at bottom of settings -->
+  <div>
+    <div class="settings-section-title" data-i18n="script">Script</div>
+    <div class="settings-btn-group">
+      <button class="settings-btn" data-script-btn="indopak" onclick="setScript('indopak')">Indo-Pak</button>
+      <button class="settings-btn" data-script-btn="uthmani" onclick="setScript('uthmani')">Uthmani</button>
+    </div>
+  </div>
+
+  <div>
+    <div class="settings-section-title" data-i18n="reciter">Reciter</div>
+    <div class="reciter-btn-group" id="reciter-btn-group">
+      <button class="reciter-btn" data-reciter-btn="afasy"   onclick="setReciter('afasy')">
+        Mishary Rashid Al-Afasy <span class="reciter-check">✓</span>
+      </button>
+      <button class="reciter-btn" data-reciter-btn="sudais"  onclick="setReciter('sudais')">
+        Abdul Rahman Al-Sudais <span class="reciter-check">✓</span>
+      </button>
+      <button class="reciter-btn" data-reciter-btn="shuraim" onclick="setReciter('shuraim')">
+        Saud Al-Shuraim <span class="reciter-check">✓</span>
+      </button>
+      <button class="reciter-btn" data-reciter-btn="ghamdi"  onclick="setReciter('ghamdi')">
+        Saad Al-Ghamdi <span class="reciter-check">✓</span>
+      </button>
+      <button class="reciter-btn" data-reciter-btn="husary"  onclick="setReciter('husary')">
+        Mahmoud Khalil Al-Hussary <span class="reciter-check">✓</span>
+      </button>
+    </div>
+  </div>
+
+  <div>
+    <div class="settings-section-title" data-i18n="offline_cache">Offline Cache</div>
+    <div id="storage-usage"></div>
+    <button id="download-all-btn" class="settings-btn" style="width:100%;margin-top:8px;text-align:center;"
+            onclick="Offline.downloadAll()" data-i18n="download_all">Download All Surahs</button>
+    <div id="download-progress">
+      <div class="download-bar-track"><div id="download-bar-fill"></div></div>
+      <div id="download-label"></div>
+    </div>
+  </div>
+
+  <!-- Notifications -->
+  <div>
+    <div class="settings-section-title" data-i18n="notifications">Notifications</div>
+    <div class="notif-status-row">
+      <span id="notif-status" class="notif-status notif-off"></span>
+      <button class="notif-test-btn" onclick="Notifications.testNotification()">Test</button>
+    </div>
+    <button id="notif-subscribe-btn" class="notif-subscribe-btn"
+            onclick="Notifications.requestPermission()">
+      Enable Notifications
+    </button>
+    <!-- Per-notification toggle + time rows (shown once permission granted) -->
+    <div class="notif-rows" id="notif-rows">
+      <div class="notif-row">
+        <span class="notif-row-icon">🌅</span>
+        <span class="notif-row-label" data-i18n="notif_aotd_label">Ayah of the Day</span>
+        <input type="time" class="notif-time-input" id="notif-time-aotd" value="08:00"
+               onchange="Notifications.updateTime('aotd', this.value)">
+        <label class="notif-toggle-wrap">
+          <input type="checkbox" id="notif-toggle-aotd"
+                 onchange="Notifications.toggleNotif('aotd', this.checked)">
+          <span class="notif-toggle-track"></span>
+        </label>
+      </div>
+      <div class="notif-row">
+        <span class="notif-row-icon">🕌</span>
+        <span class="notif-row-label" data-i18n="notif_kahf_label">Friday Al-Kahf</span>
+        <input type="time" class="notif-time-input" id="notif-time-kahf" value="08:00"
+               onchange="Notifications.updateTime('kahf', this.value)">
+        <label class="notif-toggle-wrap">
+          <input type="checkbox" id="notif-toggle-kahf"
+                 onchange="Notifications.toggleNotif('kahf', this.checked)">
+          <span class="notif-toggle-track"></span>
+        </label>
+      </div>
+      <div class="notif-row">
+        <span class="notif-row-icon">🌙</span>
+        <span class="notif-row-label" data-i18n="notif_mulk_label">Nightly Al-Mulk</span>
+        <input type="time" class="notif-time-input" id="notif-time-mulk" value="21:30"
+               onchange="Notifications.updateTime('mulk', this.value)">
+        <label class="notif-toggle-wrap">
+          <input type="checkbox" id="notif-toggle-mulk"
+                 onchange="Notifications.toggleNotif('mulk', this.checked)">
+          <span class="notif-toggle-track"></span>
+        </label>
+      </div>
+    </div>
+  </div>
+
   <button class="settings-tour-btn" onclick="Tour.open()">
     <span class="settings-tour-icon">i</span>
     <span>App Guide &amp; Tour</span>
@@ -174,23 +396,35 @@
 </aside>
 
 <!-- ── Surah Selector Modal ──────────────────────────────── -->
-<div id="surah-modal" role="dialog" aria-modal="true" aria-label="Select Surah">
+<div id="surah-modal" role="dialog" aria-modal="true">
   <div class="surah-modal-box">
     <div class="surah-modal-header">
       <span class="surah-modal-title" data-i18n="select_surah">Select Surah</span>
       <input type="search" id="surah-search" class="surah-search-input"
-             placeholder="Search by name or number…"
-             autocomplete="off" autocorrect="off" spellcheck="false">
-      <button class="modal-close-btn" onclick="closeSurahSelector()" aria-label="Close">✕</button>
+             placeholder="Search by name or number…" autocomplete="off" spellcheck="false">
+      <button class="modal-close-btn" onclick="closeSurahSelector()">✕</button>
     </div>
     <div class="goto-ayah-row">
       <span class="goto-ayah-label" data-i18n="goto_ayah">Go to Ayah</span>
       <input type="number" id="ayah-goto-input" class="goto-ayah-input"
              placeholder="Ayah number…" min="1" max="286">
-      <button class="goto-ayah-btn" onclick="gotoAyah()">Go</button>
+      <button class="goto-ayah-btn" onclick="gotoAyah()" data-i18n="goto_ayah">Go</button>
     </div>
     <div class="surah-modal-subtitle">114 Surahs</div>
     <div id="surah-list" role="listbox"></div>
+  </div>
+</div>
+
+<!-- ── Bookmark Sheet ────────────────────────────────────── -->
+<div id="bookmark-sheet-backdrop" onclick="Bookmarks.closeSheet()"></div>
+<div id="bookmark-sheet" role="dialog" aria-label="Save Bookmark">
+  <div class="sheet-handle"></div>
+  <div class="sheet-title" id="bookmark-sheet-title"></div>
+  <textarea id="bookmark-note-input" rows="3"
+            placeholder="Add a note… (optional)"></textarea>
+  <div class="sheet-actions">
+    <button class="sheet-cancel-btn" onclick="Bookmarks.closeSheet()" data-i18n="remove">Cancel</button>
+    <button class="sheet-save-btn"   onclick="Bookmarks.saveFromSheet()" data-i18n="save_bookmark">Save Bookmark</button>
   </div>
 </div>
 
@@ -198,14 +432,11 @@
 <div id="tour-modal" role="dialog" aria-modal="true" aria-label="App Guide">
   <div id="tour-card">
     <button class="tour-skip" onclick="Tour.close()">Skip tour</button>
-
     <span class="tour-icon" id="tour-icon">📖</span>
     <h2 id="tour-title"></h2>
     <p id="tour-body"></p>
-
     <div id="tour-dots"></div>
     <div id="tour-counter"></div>
-
     <div class="tour-nav">
       <button id="tour-prev-btn" onclick="Tour.prev()">← Back</button>
       <button id="tour-next-btn" onclick="Tour.next()">Next →</button>
@@ -213,41 +444,197 @@
   </div>
 </div>
 
+<!-- ── Toast ─────────────────────────────────────────────── -->
+<div id="app-toast" role="status" aria-live="polite"></div>
+
+<!-- ── Achievement / Goal Celebration Modal ──────────────── -->
+<div id="celebration-modal" role="dialog" aria-modal="true" aria-labelledby="celeb-title">
+  <div class="celebration-box">
+    <div class="celebration-particles" id="celebration-particles"></div>
+    <div class="celebration-icon" id="celeb-icon">🏅</div>
+    <div class="celebration-label" data-i18n="celeb_unlocked">Achievement Unlocked</div>
+    <div class="celebration-title" id="celeb-title"></div>
+    <div class="celebration-sub" id="celeb-sub"></div>
+    <button class="celebration-btn" onclick="Celebration.close()" data-i18n="celeb_btn">Alhamdulillah ✓</button>
+  </div>
+</div>
+
+<!-- ── Notification Permission Modal ────────────────────── -->
+<div id="notif-permission-modal" role="dialog" aria-modal="true">
+  <div class="notif-prompt-card">
+    <div class="notif-prompt-icon">🌙</div>
+    <div class="notif-prompt-title" data-i18n="notif_prompt_title">Stay Connected to the Qur'an</div>
+    <div class="notif-prompt-sub" data-i18n="notif_prompt_sub">Daily reminders to read, reflect and recite</div>
+    <div class="notif-prompt-features">
+      <div class="notif-prompt-feature" data-i18n="notif_prompt_aotd">🌅 Ayah of the Day — a random ayah every morning</div>
+      <div class="notif-prompt-feature" data-i18n="notif_prompt_kahf">🕌 Friday Reminder — Surah Al-Kahf on Jumu'ah</div>
+      <div class="notif-prompt-feature" data-i18n="notif_prompt_mulk">🌙 Nightly Reminder — Surah Al-Mulk before sleep</div>
+    </div>
+    <div class="notif-prompt-actions">
+      <button class="notif-enable-btn" onclick="Notifications.requestPermission()" data-i18n="notif_enable_btn">Enable Notifications</button>
+      <button class="notif-later-btn"  onclick="Notifications.declinePermission()"  data-i18n="notif_later_btn">Maybe Later</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Profile Setup Modal ──────────────────────────────── -->
+<div id="profile-setup-modal" class="profile-setup-backdrop">
+  <div class="profile-setup-card">
+    <div class="setup-title" data-i18n="setup_title">Welcome to Iqra</div>
+    <div class="setup-sub" data-i18n="setup_sub">Let's personalise your experience</div>
+
+    <div class="setup-field">
+      <div class="settings-section-title" data-i18n="your_name">Your Name</div>
+      <input type="text" id="setup-name-input" class="profile-text-input"
+             placeholder="e.g. Fatima" maxlength="30">
+    </div>
+
+    <div class="setup-field">
+      <div class="settings-section-title" data-i18n="reading_goal">Reading Goal</div>
+      <div class="profile-goal-input-row">
+        <span data-i18n="setup_goal_label">I want to read</span>
+        <input type="number" id="setup-goal-count" class="profile-number-input"
+               min="1" max="114" value="5">
+        <span data-i18n="surahs_goal">surahs</span>
+        <select id="setup-goal-period" class="profile-select">
+          <option value="day" data-i18n="per_day">per day</option>
+          <option value="week" selected data-i18n="per_week">per week</option>
+          <option value="month" data-i18n="per_month">per month</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="setup-start-btn" onclick="Profile.saveSetup()" data-i18n="setup_btn">Get Started</button>
+    <button class="setup-skip-btn" onclick="Profile.closeSetup()" data-i18n="setup_skip">Skip for now</button>
+  </div>
+</div>
+
 <!-- ── Scripts ───────────────────────────────────────────── -->
+<!-- Firebase v8 compat SDK — load in this exact order, before all app JS -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+<!-- Iqra Firebase config + db/auth exports -->
+<script src="js/core/firebase.js"></script>
+<script src="js/core/auth.js"></script>
+
 <script src="js/data/surahs.js"></script>
+<script src="js/data/juz.js"></script>
+<script src="js/data/sajdah.js"></script>
+<script src="js/data/reciters.js"></script>
 <script src="js/services/store.js"></script>
+<script src="js/services/progress.js"></script>
 <script src="js/services/quran-api.js"></script>
+<script src="js/services/offline.js"></script>
+<script src="js/services/notifications.js"></script>
+<script src="js/services/webpush.js"></script>
 <script src="js/core/theme.js"></script>
 <script src="js/core/i18n.js"></script>
 <script src="js/core/settings.js"></script>
 <script src="js/pages/overview.js"></script>
 <script src="js/pages/reader.js"></script>
+<script src="js/pages/bookmarks.js"></script>
+<script src="js/pages/profile.js"></script>
 <script src="js/pages/tour.js"></script>
+<script src="js/pages/celebration.js"></script>
+<script src="js/pages/khatm.js"></script>
 <script src="app.js"></script>
 
-<!-- Service Worker Registration -->
+<!-- Khatm ul Quran Modal -->
+<div id="khatm-modal" class="khatm-backdrop">
+  <div id="khatm-particles" class="khatm-particles"></div>
+  <div class="khatm-card">
+
+    <div class="khatm-ornament">۩</div>
+    <div class="khatm-arabic">خَتْمُ الْقُرْآن</div>
+    <h1 class="khatm-title">Khatm ul Quran</h1>
+    <p class="khatm-sub">You have completed all 114 Surahs.<br>May Allah accept from you.</p>
+
+    <div class="khatm-divider"></div>
+
+    <div class="khatm-dua-label">دعاء ختم القرآن</div>
+    <div class="khatm-dua-arabic" lang="ar" dir="rtl">
+      اللَّهُمَّ ارْحَمْنِي بِالقُرْآنِ،<br>
+      وَاجْعَلْهُ لِي إِمَامًا وَنُورًا وَهُدًى وَرَحْمَةً
+    </div>
+    <p class="khatm-dua-trans">
+      "O Allah, have mercy on me through the Quran,<br>
+      and make it for me a leader, a light, a guidance and a mercy."
+    </p>
+    <p class="khatm-dua-attr">— Du'a of Khatm, reported from the practice of the Salaf</p>
+
+    <div class="khatm-divider"></div>
+
+    <button class="khatm-btn" onclick="Khatm.close()">الحمد لله · Alhamdulillah</button>
+
+  </div>
+</div>
+
+<!-- Auth Modal -->
+<div id="auth-modal" class="auth-modal-backdrop">
+  <div class="auth-modal-card">
+
+    <!-- Sign In view -->
+    <div id="auth-view-signin" class="auth-view" style="display:flex; flex-direction:column; gap:16px">
+      <div class="auth-modal-header">
+        <span class="auth-modal-title" id="auth-title-signin"></span>
+        <button class="auth-modal-close" onclick="Auth.closeModal()">✕</button>
+      </div>
+      <input type="email" id="auth-email" class="auth-input"
+             placeholder="Email" autocomplete="email" inputmode="email">
+      <input type="password" id="auth-password" class="auth-input"
+             placeholder="Password" autocomplete="current-password">
+      <div id="auth-signin-error" class="auth-error"></div>
+      <button id="auth-signin-btn" class="auth-btn-primary" onclick="Auth.handleSignIn()"></button>
+      <button class="auth-link" onclick="Auth.showView('reset')" id="auth-forgot-link"></button>
+    </div>
+
+    <!-- Password Reset view -->
+    <div id="auth-view-reset" class="auth-view" style="display:none; flex-direction:column; gap:16px">
+      <div class="auth-modal-header">
+        <span class="auth-modal-title" id="auth-title-reset"></span>
+        <button class="auth-modal-close" onclick="Auth.closeModal()">✕</button>
+      </div>
+      <input type="email" id="auth-reset-email" class="auth-input"
+             placeholder="Email" autocomplete="email" inputmode="email">
+      <div id="auth-reset-error" class="auth-error"></div>
+      <div id="auth-reset-success" class="auth-success"></div>
+      <button id="auth-reset-btn" class="auth-btn-primary" onclick="Auth.handleReset()"></button>
+      <button class="auth-link" onclick="Auth.showView('signin')" id="auth-back-link"></button>
+    </div>
+
+  </div>
+</div>
+
+<!-- Service Worker -->
 <script>
-  if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./sw.js")
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js')
         .then(reg => {
-          // Check for updates every time the app loads
+          // Check for updates on every load
           reg.update();
-          // When a new SW is waiting, reload to activate it
-          reg.addEventListener("updatefound", () => {
-            const newWorker = reg.installing;
-            newWorker.addEventListener("statechange", () => {
-              if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
-                // New version available — reload silently
-                navigator.serviceWorker.addEventListener("controllerchange", () => {
-                  window.location.reload();
-                });
-                newWorker.postMessage({ type: "SKIP_WAITING" });
+
+          reg.addEventListener('updatefound', () => {
+            const nw = reg.installing;
+            nw.addEventListener('statechange', () => {
+              // New SW installed and ready — skip waiting so it activates immediately
+              if (nw.state === 'installed') {
+                nw.postMessage({ type: 'SKIP_WAITING' });
               }
             });
           });
-        })
-        .catch(err => console.warn("SW registration failed:", err));
+        }).catch(e => console.warn('SW registration failed:', e));
+
+      // When a new SW takes control — reload once to get fresh files
+      let refreshing = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!refreshing) {
+          refreshing = true;
+          window.location.reload();
+        }
+      });
     });
   }
 </script>

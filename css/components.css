@@ -147,7 +147,7 @@ a:hover { color: var(--gold-light); }
 
 .bnb-icon { font-size: 18px; line-height: 1; }
 .bnb-label {
-  font-size: 10px;
+  font-size: 15px;
   font-family: 'Cinzel', serif;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -173,6 +173,7 @@ a:hover { color: var(--gold-light); }
   padding-top: var(--nav-h);
   padding-bottom: calc(var(--audio-bar-h) + 8px);
   min-height: 100dvh;
+  overflow-anchor: none;
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -273,7 +274,7 @@ a:hover { color: var(--gold-light); }
 
 .surah-tile-num {
   font-family: system-ui, sans-serif;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--text-tertiary);
   letter-spacing: 0.04em;
@@ -295,7 +296,7 @@ a:hover { color: var(--gold-light); }
 
 .surah-tile-name {
   font-family: 'Cinzel', serif;
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0.05em;
   color: var(--text-secondary);
   line-height: 1.3;
@@ -306,7 +307,7 @@ a:hover { color: var(--gold-light); }
 }
 
 .surah-tile-meta {
-  font-size: 10px;
+  font-size: 11px;
   font-family: system-ui, sans-serif;
   color: var(--text-tertiary);
   letter-spacing: 0.03em;
@@ -323,8 +324,23 @@ a:hover { color: var(--gold-light); }
   display: flex;
   align-items: center;
   gap: 14px;
-  position: relative;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  transition: padding 0.25s ease, box-shadow 0.25s ease;
 }
+
+/* ── Compact state — triggered by scroll ─────────────────── */
+#surah-header.scrolled {
+  padding: 10px 20px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+}
+#surah-header.scrolled .surah-name-arabic { display: none; }
+#surah-header.scrolled #surah-meaning,
+#surah-header.scrolled #surah-meta,
+#surah-header.scrolled #surah-counter     { display: none; }
+#surah-header.scrolled #surah-name        { font-size: 14px; }
+#surah-header.scrolled .surah-nav-arrow   { width: 32px; height: 32px; font-size: 14px; }
 
 [data-theme="dark"] #surah-header::before {
   content: '';
@@ -363,12 +379,13 @@ a:hover { color: var(--gold-light); }
   text-rendering: optimizeLegibility;
   font-feature-settings: "calt" 1, "liga" 1, "rlig" 1, "mset" 1;
   -webkit-font-smoothing: antialiased;
+  transition: font-size 0.25s ease;
 }
 
-#surah-name   { font-family: 'Cinzel', serif; font-size: 17px; color: var(--text-primary); letter-spacing: 0.06em; display: block; }
+#surah-name   { font-family: 'Cinzel', serif; font-size: 17px; color: var(--text-primary); letter-spacing: 0.06em; display: block; transition: font-size 0.25s ease; }
 #surah-meaning{ font-family: 'Cormorant Garamond', serif; font-size: 14px; color: var(--text-secondary); font-style: italic; display: block; margin-top: 2px; }
-#surah-meta   { font-family: 'Cinzel', serif; font-size: 10px; color: var(--text-tertiary); letter-spacing: 0.08em; text-transform: uppercase; margin-top: 6px; display: block; }
-#surah-counter{ font-family: system-ui, sans-serif; font-size: 10px; color: var(--text-tertiary); margin-top: 3px; display: block; letter-spacing: 0.04em; }
+#surah-meta   { font-family: 'Cinzel', serif; font-size: 12px; color: var(--text-tertiary); letter-spacing: 0.08em; text-transform: uppercase; margin-top: 6px; display: block; }
+#surah-counter{ font-family: system-ui, sans-serif; font-size: 12px; color: var(--text-tertiary); margin-top: 3px; display: block; letter-spacing: 0.04em; }
 
 /* ── Bismillah ────────────────────────────────────────────── */
 .bismillah-ornament {
@@ -443,9 +460,12 @@ a:hover { color: var(--gold-light); }
 .ayah-text { flex: 1; padding-right: 20px; min-width: 0; }
 
 .ayah-arabic {
-  font-family: 'KFGQPC Uthmanic Script HAFS', 'Noto Naskh Arabic', serif;
+  /* Font family is set by data-script in design-system.css */
+  /* Default (indopak): IndoPak Nastaleeq → Noto Nastaliq Urdu fallback */
+  /* Uthmani: KFGQPC Uthmanic Script HAFS                               */
+  font-family: 'IndoPak Nastaleeq', 'Noto Nastaliq Urdu', 'KFGQPC Uthmanic Script HAFS', serif;
   font-size: var(--sz-arabic);
-  line-height: 2.2;
+  line-height: 2.6;
   color: var(--text-arabic);
   direction: rtl;
   text-align: right;
@@ -455,6 +475,11 @@ a:hover { color: var(--gold-light); }
   text-rendering: optimizeLegibility;
   font-feature-settings: "calt" 1, "liga" 1, "rlig" 1, "mset" 1;
   -webkit-font-smoothing: antialiased;
+}
+
+[data-script="uthmani"] .ayah-arabic {
+  font-family: 'KFGQPC Uthmanic Script HAFS', 'Noto Naskh Arabic', serif;
+  line-height: 2.2;
 }
 
 [data-theme="dark"] .ayah-arabic { text-shadow: 0 0 40px rgba(245,240,232,0.04); }
@@ -563,7 +588,7 @@ a:hover { color: var(--gold-light); }
 #settings-panel {
   position: fixed;
   top: 0; right: 0; bottom: 0;
-  width: 300px;
+  width: 340px;
   background: var(--bg-surface);
   border-left: 1px solid var(--border-strong);
   box-shadow: -8px 0 40px rgba(0,0,0,0.4);
@@ -604,7 +629,7 @@ a:hover { color: var(--gold-light); }
 
 .settings-section-title {
   font-family: system-ui, sans-serif;
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--text-tertiary);
@@ -614,10 +639,10 @@ a:hover { color: var(--gold-light); }
 .settings-btn-group { display: flex; gap: 6px; flex-wrap: wrap; }
 
 .settings-btn {
-  padding: 8px 14px;
+  padding: 10px 16px;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  font-size: 14px;
+  font-size: 16px;
   color: var(--text-secondary);
   background: var(--bg-elevated);
   transition: var(--transition);
@@ -634,10 +659,10 @@ a:hover { color: var(--gold-light); }
 }
 
 .size-btn {
-  padding: 7px 4px;
+  padding: 9px 4px;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-secondary);
   background: var(--bg-elevated);
   transition: var(--transition);
@@ -876,24 +901,55 @@ a:hover { color: var(--gold-light); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* ── Bottom nav layout adjustment ───────────────────────── */
-/* Audio bar hidden on overview; visible on reader          */
+/* ── Bottom nav layout ───────────────────────────────────── */
+/* Three sections: [Overview tab] [Audio bar] [Reader] [Bookmarks] */
+/* Audio bar is flex:1 and shrinks to fit — no overflow on mobile  */
 #bottomNav {
-  justify-content: center;
+  justify-content: stretch;
   gap: 0;
+  overflow: hidden;       /* never overflow the viewport */
+  box-sizing: border-box;
+  width: 100%;
 }
 
-/* Nav tab buttons take equal space */
-.bottom-nav-btn { flex: 0 0 80px; }
+/* Nav tab buttons — fixed, compact on small screens */
+.bottom-nav-btn {
+  flex: 0 0 auto;
+  min-width: 60px;
+  max-width: 88px;
+  padding: 8px 6px;
+}
 
-/* Audio bar fills remaining space, centered */
+/* Desktop — labels can be smaller since mouse users don't need large targets */
+@media (min-width: 640px) {
+  .bnb-label { font-size: 11px; }
+  .bottom-nav-btn { min-width: 52px; max-width: 72px; }
+}
+
+/* Audio bar fills remaining space but never forces overflow */
 #audio-bar {
   display: flex;
-  flex: 1;
+  flex: 1 1 0;
+  min-width: 0;           /* allows shrinking below content size */
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  padding: 0 8px;
+  gap: 8px;
+  padding: 0 4px;
+  overflow: hidden;
+}
+
+/* Play button shrinks gracefully on small screens */
+#play-btn {
+  min-width: 0;
+  flex-shrink: 1;
+  padding: 11px 16px;
+}
+
+@media (max-width: 480px) {
+  .bottom-nav-btn { min-width: 44px; padding: 8px 4px; }
+  #play-btn { padding: 10px 12px; font-size: 11px; }
+  #audio-bar { gap: 4px; }
+  .bnb-label { display: none; } /* icons only on phones — labels show on tablet+ */
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -1123,3 +1179,2050 @@ a:hover { color: var(--gold-light); }
   #tour-title       { font-size: 16px; }
   #tour-body        { font-size: 14px; }
 }
+
+/* ══════════════════════════════════════════════════════════
+   V2 — OVERVIEW ADDITIONS
+   ══════════════════════════════════════════════════════════ */
+
+/* ── View toggle (Surah / Juz) ────────────────────────────── */
+.view-toggle {
+  display: flex;
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  margin: 16px 14px 0;
+}
+
+.view-toggle-btn {
+  flex: 1;
+  padding: 8px 16px;
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  background: var(--bg-elevated);
+  transition: var(--transition);
+  border: none;
+}
+
+.view-toggle-btn.active {
+  background: var(--gold-dim);
+  color: var(--gold);
+}
+
+.view-toggle-btn:first-child { border-right: 1px solid var(--border); }
+
+/* ── Favourites section ───────────────────────────────────── */
+#favourites-section {
+  padding: 16px 14px 0;
+}
+
+.favourites-label {
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.favourites-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+#favourites-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+@media (min-width: 480px) { #favourites-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (min-width: 680px) { #favourites-grid { grid-template-columns: repeat(4, 1fr); } }
+
+#favourites-empty {
+  font-family: 'Crimson Pro', serif;
+  font-size: 15px;
+  color: var(--text-tertiary);
+  font-style: italic;
+  text-align: center;
+  padding: 12px 0 4px;
+}
+
+.all-surahs-label {
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  margin: 16px 14px 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.all-surahs-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ── Surah tile — V2 additions ────────────────────────────── */
+.surah-tile-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.tile-heart {
+  font-size: 14px;
+  color: var(--text-tertiary);
+  background: none;
+  border: none;
+  padding: 0 0 0 4px;
+  cursor: pointer;
+  transition: var(--transition);
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.tile-heart:hover { color: var(--gold); transform: scale(1.2); }
+.tile-heart.active { color: var(--gold); }
+.tile-heart.active::before { content: '♥'; }
+.tile-heart:not(.active)::before { content: '♡'; }
+.tile-heart { font-size: 0; }
+.tile-heart::before { font-size: 13px; }
+
+.cached-dot {
+  display: inline-block;
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--teal-light);
+  margin-left: 3px;
+  vertical-align: middle;
+}
+
+/* Juz tile */
+.juz-tile .surah-tile-arabic { font-size: 24px; }
+
+/* ══════════════════════════════════════════════════════════
+   V2 — READER ADDITIONS
+   ══════════════════════════════════════════════════════════ */
+
+/* ── Ayah num wrap — holds number + sajdah + bookmark ─────── */
+.ayah-num-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin: 6px 12px 0 16px;
+  flex-shrink: 0;
+}
+
+/* Keep original ayah-number styles, just remove individual margin */
+.ayah-number { margin: 0; }
+
+/* ── Sajdah badge ─────────────────────────────────────────── */
+.sajdah-badge {
+  font-size: 12px;
+  color: var(--gold);
+  line-height: 1;
+  cursor: default;
+  opacity: 0.85;
+  font-family: 'KFGQPC Uthmanic Script HAFS', 'Noto Naskh Arabic', serif;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "calt" 1, "liga" 1, "rlig" 1, "mset" 1;
+}
+
+/* ── Bookmark icon on ayah ────────────────────────────────── */
+/* Mobile: always slightly visible so users know it's there    */
+/* Desktop: hidden until hover on the ayah block, then visible */
+.ayah-bookmark-btn {
+  font-size: 13px;
+  font-family: system-ui, sans-serif; /* never inherit Arabic font — emoji must render correctly */
+  background: none;
+  border: none;
+  cursor: pointer;
+  opacity: 0.25;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  line-height: 1;
+  padding: 2px;
+  border-radius: 4px;
+}
+
+/* On touch devices — keep slightly visible for discoverability */
+@media (hover: none) {
+  .ayah-bookmark-btn { opacity: 0.3; }
+}
+
+/* On desktop — hide until ayah is hovered */
+@media (hover: hover) {
+  .ayah-bookmark-btn { opacity: 0; }
+  .ayah-block:hover .ayah-bookmark-btn { opacity: 0.55; }
+}
+
+.ayah-bookmark-btn:hover { opacity: 1 !important; transform: scale(1.15); }
+.ayah-bookmark-btn.active { opacity: 1 !important; }
+
+@media (min-width: 640px) { .ayah-num-wrap { margin: 6px 16px 0 24px; } }
+@media (min-width: 1024px){ .ayah-num-wrap { margin: 6px 22px 0 36px; } }
+@media (min-width: 1440px){ .ayah-num-wrap { margin: 6px 28px 0 52px; } }
+
+/* ── Ayah end marker ۝ — gold Arabic-Indic number, no circle ── */
+/* Floats inline after the ayah text in gold, no border/circle.  */
+/* Uses KFGQPC font so numerals render correctly in both scripts. */
+.ayah-end-marker {
+  display: inline;
+  color: var(--gold);
+  font-size: 0.6em;
+  font-family: 'KFGQPC Uthmanic Script HAFS', 'Noto Naskh Arabic', serif !important;
+  line-height: 1;
+  vertical-align: middle;
+  margin-left: 4px;
+  user-select: none;
+  opacity: 0.9;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "calt" 1, "liga" 1, "rlig" 1, "mset" 1;
+  -webkit-font-smoothing: antialiased;
+}
+
+
+/* ── Juz divider ─────────────────────────────────────────── */
+.juz-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 20px;
+  user-select: none;
+}
+
+.juz-divider-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--border-strong), transparent);
+}
+
+.juz-divider-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: 20px;
+  background: var(--gold-dim);
+  flex-shrink: 0;
+}
+
+.juz-divider-arabic {
+  font-family: 'KFGQPC Uthmanic Script HAFS', 'Noto Naskh Arabic', serif;
+  font-size: 16px;
+  color: var(--gold);
+  direction: rtl;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "calt" 1, "liga" 1, "rlig" 1, "mset" 1;
+  -webkit-font-smoothing: antialiased;
+}
+
+.juz-divider-text {
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--gold);
+  text-transform: uppercase;
+}
+
+/* ── Reading mode ─────────────────────────────────────────── */
+/* When .reading-mode is on <html>:
+   - Translations hidden
+   - Arabic centered, slightly larger
+   - Ayah number column hidden
+   - More vertical breathing room                             */
+
+.reading-mode .ayah-translation       { display: none !important; }
+.reading-mode .ayah-num-wrap          { display: none !important; }
+.reading-mode .ayah-text              { padding: 0 28px; }
+.reading-mode .ayah-arabic            { text-align: center; margin-bottom: 0; }
+.reading-mode .ayah-block             { padding: 20px 0; justify-content: center; }
+.reading-mode .bismillah-ornament     { font-size: clamp(36px, 6vw, 64px); }
+
+/* Reading mode toggle button in reader controls */
+#reading-mode-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  background: var(--bg-elevated);
+  transition: var(--transition);
+}
+
+#reading-mode-btn:hover  { border-color: var(--border-strong); color: var(--text-primary); }
+#reading-mode-btn.active { border-color: var(--gold); color: var(--gold); background: var(--gold-dim); }
+
+.reader-controls-bar {
+  display: flex;
+  justify-content: flex-end;
+  padding: 10px 20px 0;
+  gap: 8px;
+}
+
+@media (min-width: 1024px) { .reader-controls-bar { padding: 10px 40px 0; } }
+
+/* ══════════════════════════════════════════════════════════
+   V2 — BOOKMARKS PAGE
+   ══════════════════════════════════════════════════════════ */
+
+#page-bookmarks {
+  padding-top: var(--nav-h);
+  padding-bottom: calc(var(--audio-bar-h) + 8px);
+  min-height: 100dvh;
+}
+
+.bookmarks-header {
+  padding: 24px 20px 18px;
+  border-bottom: 1px solid var(--border);
+}
+
+.bookmarks-title {
+  font-family: 'Cinzel', serif;
+  font-size: 18px;
+  color: var(--gold);
+  letter-spacing: 0.06em;
+}
+
+.bookmarks-subtitle {
+  font-size: 13px;
+  color: var(--text-tertiary);
+  font-family: system-ui, sans-serif;
+  margin-top: 4px;
+}
+
+#bookmarks-list {
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.bookmark-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: var(--transition);
+  animation: ayahEnter 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.bookmark-card:hover { border-color: var(--border-strong); }
+
+.bookmark-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.bookmark-ref {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bookmark-surah {
+  font-family: 'Cinzel', serif;
+  font-size: 13px;
+  color: var(--gold);
+  letter-spacing: 0.04em;
+}
+
+.bookmark-sep { color: var(--text-tertiary); font-size: 12px; }
+
+.bookmark-ayah {
+  font-family: system-ui, sans-serif;
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+.bookmark-date {
+  font-family: system-ui, sans-serif;
+  font-size: 11px;
+  color: var(--text-tertiary);
+  flex-shrink: 0;
+}
+
+.bookmark-arabic {
+  font-family: 'KFGQPC Uthmanic Script HAFS', 'Noto Naskh Arabic', serif;
+  font-size: 22px;
+  line-height: 1.9;
+  color: var(--text-arabic);
+  direction: rtl;
+  text-align: right;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "calt" 1, "liga" 1, "rlig" 1, "mset" 1;
+  -webkit-font-smoothing: antialiased;
+}
+
+.bookmark-note {
+  font-family: 'Crimson Pro', serif;
+  font-size: 15px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  padding: 10px 12px;
+  background: var(--bg-elevated);
+  border-radius: var(--radius-sm);
+  border-left: 2px solid var(--gold);
+  font-style: italic;
+}
+
+.bookmark-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.bookmark-goto-btn {
+  padding: 7px 16px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
+  background: var(--bg-elevated);
+  transition: var(--transition);
+}
+
+.bookmark-goto-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+.bookmark-delete-btn {
+  padding: 7px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: system-ui, sans-serif;
+  font-size: 12px;
+  color: var(--text-tertiary);
+  transition: var(--transition);
+}
+
+.bookmark-delete-btn:hover { border-color: #e05b50; color: #e05b50; }
+
+.bookmarks-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.bookmarks-empty-icon { font-size: 40px; }
+
+.bookmarks-empty-title {
+  font-family: 'Cinzel', serif;
+  font-size: 16px;
+  color: var(--text-secondary);
+  letter-spacing: 0.05em;
+}
+
+.bookmarks-empty-body {
+  font-family: 'Crimson Pro', serif;
+  font-size: 15px;
+  color: var(--text-tertiary);
+  font-style: italic;
+  line-height: 1.7;
+  max-width: 280px;
+}
+
+/* ── Bookmark sheet ───────────────────────────────────────── */
+#bookmark-sheet-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 450;
+  opacity: 0; visibility: hidden;
+  transition: opacity 0.25s ease, visibility 0.25s ease;
+}
+
+#bookmark-sheet {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: var(--bg-surface);
+  border-top: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  padding: 24px 20px 32px;
+  z-index: 451;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  transform: translateY(100%);
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+#bookmark-sheet.open,
+#bookmark-sheet.open ~ #bookmark-sheet-backdrop { transform: translateY(0); }
+#bookmark-sheet.open ~ #bookmark-sheet-backdrop { opacity: 1; visibility: visible; }
+
+/* Fix: backdrop needs to be before sheet in DOM order for ~ selector */
+#bookmark-sheet-backdrop.open { opacity: 1; visibility: visible; }
+#bookmark-sheet.open { transform: translateY(0); }
+
+.sheet-handle {
+  width: 36px; height: 4px;
+  background: var(--border-strong);
+  border-radius: 2px;
+  margin: 0 auto -8px;
+}
+
+.sheet-title {
+  font-family: 'Cinzel', serif;
+  font-size: 14px;
+  color: var(--gold);
+  letter-spacing: 0.06em;
+}
+
+#bookmark-note-input {
+  width: 100%;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  font-family: 'Crimson Pro', serif;
+  font-size: 16px;
+  line-height: 1.75;
+  color: var(--text-primary);
+  resize: none;
+  min-height: 90px;
+  transition: border-color 0.2s ease;
+}
+
+#bookmark-note-input:focus { border-color: var(--gold); outline: none; box-shadow: 0 0 0 2px rgba(240,192,96,0.12); }
+#bookmark-note-input::placeholder { color: var(--text-tertiary); }
+
+.sheet-actions { display: flex; gap: 10px; }
+
+.sheet-save-btn {
+  flex: 1;
+  padding: 13px;
+  border: 1px solid var(--gold);
+  border-radius: var(--radius-md);
+  font-family: 'Cinzel', serif;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  color: var(--gold);
+  background: var(--gold-dim);
+  transition: var(--transition);
+  text-align: center;
+}
+
+.sheet-save-btn:hover { background: var(--gold); color: var(--bg-base); }
+
+.sheet-cancel-btn {
+  padding: 13px 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  color: var(--text-secondary);
+  transition: var(--transition);
+}
+
+.sheet-cancel-btn:hover { border-color: var(--border-strong); }
+
+/* ══════════════════════════════════════════════════════════
+   V2 — SETTINGS ADDITIONS
+   ══════════════════════════════════════════════════════════ */
+
+/* Reciter buttons — stack vertically for readability */
+.reciter-btn-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.reciter-btn {
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 16px;
+  color: var(--text-secondary);
+  background: var(--bg-elevated);
+  transition: var(--transition);
+  font-family: 'Crimson Pro', serif;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.reciter-btn:hover { border-color: var(--border-strong); color: var(--text-primary); }
+.reciter-btn.active { border-color: var(--gold); color: var(--gold); background: var(--gold-dim); }
+
+.reciter-check { font-size: 14px; opacity: 0; }
+.reciter-btn.active .reciter-check { opacity: 1; }
+
+/* Download progress bar */
+#download-progress {
+  display: none;
+  margin-top: 8px;
+}
+
+.download-bar-track {
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+
+#download-bar-fill {
+  height: 100%;
+  background: var(--gold);
+  border-radius: 2px;
+  width: 0%;
+  transition: width 0.3s ease;
+}
+
+#download-label {
+  font-family: system-ui, sans-serif;
+  font-size: 11px;
+  color: var(--text-tertiary);
+  letter-spacing: 0.04em;
+}
+
+#storage-usage {
+  font-family: system-ui, sans-serif;
+  font-size: 11px;
+  color: var(--text-tertiary);
+  margin-top: 4px;
+  letter-spacing: 0.03em;
+}
+
+/* ══════════════════════════════════════════════════════════
+   V2 — TOAST
+   ══════════════════════════════════════════════════════════ */
+
+#app-toast {
+  position: fixed;
+  bottom: calc(var(--audio-bar-h) + 16px);
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-strong);
+  border-radius: 20px;
+  padding: 10px 20px;
+  font-family: 'Cinzel', serif;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: var(--text-primary);
+  box-shadow: var(--shadow-card);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s ease;
+  z-index: 600;
+  white-space: nowrap;
+}
+
+#app-toast.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ══════════════════════════════════════════════════════════
+   NOTIFICATIONS
+   ══════════════════════════════════════════════════════════ */
+
+/* ── Permission prompt modal ─────────────────────────────── */
+#notif-permission-modal {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.82);
+  z-index: 500;
+  display: flex; align-items: flex-end; justify-content: center;
+  padding: 20px;
+  opacity: 0; visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+#notif-permission-modal.open {
+  opacity: 1; visibility: visible;
+}
+
+.notif-prompt-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card), 0 0 60px rgba(240,192,96,0.08);
+  width: 100%;
+  max-width: 480px;
+  padding: 28px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  animation: sheetRise 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+  margin-bottom: 8px;
+}
+
+@keyframes sheetRise {
+  from { opacity: 0; transform: translateY(40px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.notif-prompt-icon {
+  font-size: 40px;
+  text-align: center;
+  line-height: 1;
+}
+
+.notif-prompt-title {
+  font-family: 'Cinzel', serif;
+  font-size: 20px;
+  color: var(--gold);
+  letter-spacing: 0.05em;
+  text-align: center;
+  line-height: 1.4;
+}
+
+.notif-prompt-sub {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 16px;
+  color: var(--text-secondary);
+  text-align: center;
+  font-style: italic;
+  line-height: 1.6;
+  margin-top: -6px;
+}
+
+.notif-prompt-features {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--bg-elevated);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+}
+
+.notif-prompt-feature {
+  font-family: 'Crimson Pro', serif;
+  font-size: 15px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.notif-prompt-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.notif-enable-btn {
+  padding: 14px;
+  border: 1px solid var(--gold);
+  border-radius: var(--radius-md);
+  font-family: 'Cinzel', serif;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  color: var(--gold);
+  background: var(--gold-dim);
+  transition: var(--transition);
+  text-align: center;
+}
+
+.notif-enable-btn:hover { background: var(--gold); color: var(--bg-base); }
+
+.notif-later-btn {
+  padding: 12px;
+  font-family: 'Crimson Pro', serif;
+  font-size: 15px;
+  color: var(--text-tertiary);
+  text-align: center;
+  transition: color 0.2s ease;
+}
+
+.notif-later-btn:hover { color: var(--text-secondary); }
+
+/* ── Notification settings section ───────────────────────── */
+.notif-note {
+  font-family: system-ui, sans-serif;
+  font-size: 11px;
+  color: var(--text-tertiary);
+  line-height: 1.5;
+  padding: 8px 10px;
+  background: var(--bg-elevated);
+  border-radius: var(--radius-sm);
+  border-left: 2px solid var(--border-strong);
+  margin-bottom: 8px;
+}
+
+.notif-status-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.notif-test-btn {
+  padding: 4px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  font-family: system-ui, sans-serif;
+  font-size: 11px;
+  color: var(--text-secondary);
+  transition: var(--transition);
+}
+.notif-test-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+.notif-status {
+  font-family: system-ui, sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  padding: 4px 10px;
+  border-radius: 20px;
+  display: inline-block;
+  margin-bottom: 10px;
+}
+
+.notif-active    { background: rgba(58,125,123,0.15); color: var(--teal-light); }
+.notif-off       { background: var(--bg-elevated);    color: var(--text-tertiary); cursor: pointer; }
+.notif-blocked   { background: rgba(224,91,80,0.12);  color: #e05b50; }
+.notif-unsupported{ background: var(--bg-elevated);   color: var(--text-tertiary); }
+
+/* Notification row — toggle + label + time */
+.notif-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.notif-row:last-child { border-bottom: none; }
+
+.notif-row-info { flex: 1; min-width: 0; }
+
+.notif-row-label {
+  font-family: 'Crimson Pro', serif;
+  font-size: 16px;
+  color: var(--text-primary);
+  display: block;
+  line-height: 1.3;
+}
+
+.notif-row-time {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.notif-time-label {
+  font-family: system-ui, sans-serif;
+  font-size: 11px;
+  color: var(--text-tertiary);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.notif-time-input {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 4px 8px;
+  font-family: system-ui, sans-serif;
+  font-size: 13px;
+  color: var(--text-primary);
+  transition: border-color 0.2s ease;
+  width: 80px;
+}
+
+.notif-time-input:focus   { border-color: var(--gold); outline: none; }
+.notif-time-input:disabled{ opacity: 0.4; cursor: not-allowed; }
+
+/* Toggle switch */
+.notif-toggle {
+  position: relative;
+  width: 44px; height: 24px;
+  flex-shrink: 0;
+}
+
+.notif-toggle input {
+  opacity: 0; width: 0; height: 0;
+  position: absolute;
+}
+
+.notif-toggle-slider {
+  position: absolute;
+  inset: 0;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.25s ease, border-color 0.25s ease;
+}
+
+.notif-toggle-slider::before {
+  content: '';
+  position: absolute;
+  width: 18px; height: 18px;
+  left: 2px; top: 50%;
+  transform: translateY(-50%);
+  background: var(--text-tertiary);
+  border-radius: 50%;
+  transition: transform 0.25s ease, background 0.25s ease;
+}
+
+.notif-toggle input:checked + .notif-toggle-slider {
+  background: var(--gold-dim);
+  border-color: var(--gold);
+}
+
+.notif-toggle input:checked + .notif-toggle-slider::before {
+  transform: translateX(20px) translateY(-50%);
+  background: var(--gold);
+}
+
+.notif-toggle input:disabled + .notif-toggle-slider {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ══════════════════════════════════════════════════════════
+   PROFILE — Settings section + Setup modal
+   ══════════════════════════════════════════════════════════ */
+
+/* ── Profile card in settings ────────────────────────────── */
+.profile-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Name row */
+.profile-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.profile-name-input {
+  flex: 1;
+  background: var(--bg-base);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 9px 12px;
+  font-family: 'Crimson Pro', serif;
+  font-size: 16px;
+  color: var(--text-primary);
+  transition: border-color 0.2s ease;
+  min-width: 0;
+}
+.profile-name-input:focus { border-color: var(--gold); outline: none; }
+.profile-name-input::placeholder { color: var(--text-tertiary); }
+
+.profile-name-save {
+  width: 36px; height: 36px;
+  border: 1px solid var(--gold);
+  border-radius: var(--radius-sm);
+  background: var(--gold-dim);
+  color: var(--gold);
+  font-size: 15px;
+  flex-shrink: 0;
+  transition: var(--transition);
+  display: flex; align-items: center; justify-content: center;
+}
+.profile-name-save:hover { background: var(--gold); color: var(--bg-base); }
+
+/* Greeting */
+.profile-greeting {
+  font-family: 'Cinzel', serif;
+  font-size: 14px;
+  color: var(--gold);
+  letter-spacing: 0.04em;
+}
+
+/* Stats */
+.profile-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.profile-stat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-base);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 10px;
+  min-width: 0;
+}
+
+.profile-stat-icon { font-size: 18px; line-height: 1; flex-shrink: 0; }
+
+.profile-stat-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.profile-stat-text > span:first-child {
+  font-family: system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.profile-stat-label {
+  font-family: system-ui, sans-serif;
+  font-size: 9px;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Goal section ────────────────────────────────────────── */
+.profile-goal-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.profile-goal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.profile-goal-input-compact {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: nowrap;
+  flex: 1;
+  min-width: 0;
+}
+
+.profile-goal-sep {
+  font-family: system-ui, sans-serif;
+  font-size: 12px;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+}
+
+.profile-number-input-sm {
+  width: 44px;
+  background: var(--bg-base);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 5px 6px;
+  font-family: system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-align: center;
+}
+.profile-number-input-sm:focus { border-color: var(--gold); outline: none; }
+
+.profile-select-sm {
+  background: var(--bg-base);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 5px 6px;
+  font-family: system-ui, sans-serif;
+  font-size: 12px;
+  color: var(--text-secondary);
+  flex: 1;
+  min-width: 0;
+}
+.profile-select-sm:focus { border-color: var(--gold); outline: none; }
+
+.profile-goal-set {
+  padding: 5px 10px;
+  border: 1px solid var(--gold);
+  border-radius: var(--radius-sm);
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--gold);
+  background: var(--gold-dim);
+  transition: var(--transition);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.profile-goal-set:hover { background: var(--gold); color: var(--bg-base); }
+
+.profile-ach-title {
+  font-family: system-ui, sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+/* ── Goal progress bar ───────────────────────────────────── */
+.profile-goal-section { }
+
+.profile-goal-track {
+  height: 5px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+
+.profile-goal-bar {
+  height: 100%;
+  background: var(--gold);
+  border-radius: 3px;
+  width: 0%;
+  transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.profile-goal-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.profile-goal-label {
+  font-family: system-ui, sans-serif;
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+.profile-goal-badge {
+  font-size: 18px;
+  animation: badgePop 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes badgePop {
+  from { transform: scale(0); }
+  to   { transform: scale(1); }
+}
+
+/* ── Achievements grid ───────────────────────────────────── */
+.profile-achievements {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.ach-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  min-width: 64px;
+  transition: var(--transition);
+}
+
+.ach-badge.earned {
+  border-color: var(--gold);
+  background: var(--gold-dim);
+}
+
+.ach-badge.locked {
+  opacity: 0.35;
+  filter: grayscale(1);
+}
+
+.ach-icon { font-size: 20px; line-height: 1; }
+
+.ach-label {
+  font-family: system-ui, sans-serif;
+  font-size: 10px;
+  color: var(--text-tertiary);
+  text-align: center;
+  line-height: 1.3;
+  max-width: 64px;
+}
+
+.ach-badge.earned .ach-label { color: var(--gold); }
+
+/* ── Profile inputs ──────────────────────────────────────── */
+.profile-input-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.profile-text-input {
+  flex: 1;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  font-family: 'Crimson Pro', serif;
+  font-size: 16px;
+  color: var(--text-primary);
+  transition: border-color 0.2s ease;
+}
+
+.profile-text-input:focus {
+  border-color: var(--gold);
+  outline: none;
+}
+
+.profile-text-input::placeholder { color: var(--text-tertiary); }
+
+.profile-goal-input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-family: 'Crimson Pro', serif;
+  font-size: 15px;
+  color: var(--text-secondary);
+}
+
+.profile-number-input {
+  width: 56px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  font-family: system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-align: center;
+  transition: border-color 0.2s ease;
+}
+
+.profile-number-input:focus { border-color: var(--gold); outline: none; }
+
+.profile-select {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  font-family: 'Crimson Pro', serif;
+  font-size: 15px;
+  color: var(--text-secondary);
+  transition: border-color 0.2s ease;
+}
+
+.profile-select:focus { border-color: var(--gold); outline: none; }
+
+.profile-save-btn {
+  padding: 10px 16px;
+  border: 1px solid var(--gold);
+  border-radius: var(--radius-sm);
+  font-family: 'Cinzel', serif;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: var(--gold);
+  background: var(--gold-dim);
+  transition: var(--transition);
+  white-space: nowrap;
+}
+
+.profile-save-btn:hover { background: var(--gold); color: var(--bg-base); }
+
+/* ── First-time setup modal ──────────────────────────────── */
+.profile-setup-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 500;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0; visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.profile-setup-backdrop.open {
+  opacity: 1; visibility: visible;
+}
+
+.profile-setup-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  width: 100%;
+  max-width: 480px;
+  padding: 28px 24px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-bottom: 8px;
+  animation: sheetRise 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.setup-title {
+  font-family: 'Cinzel', serif;
+  font-size: 20px;
+  color: var(--gold);
+  letter-spacing: 0.05em;
+  text-align: center;
+}
+
+.setup-sub {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 16px;
+  color: var(--text-secondary);
+  text-align: center;
+  font-style: italic;
+  margin-top: -12px;
+}
+
+.setup-field { display: flex; flex-direction: column; gap: 8px; }
+
+.setup-start-btn {
+  padding: 14px;
+  border: 1px solid var(--gold);
+  border-radius: var(--radius-md);
+  font-family: 'Cinzel', serif;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  color: var(--gold);
+  background: var(--gold-dim);
+  transition: var(--transition);
+  text-align: center;
+}
+
+.setup-start-btn:hover { background: var(--gold); color: var(--bg-base); }
+
+.setup-skip-btn {
+  font-family: 'Crimson Pro', serif;
+  font-size: 15px;
+  color: var(--text-tertiary);
+  text-align: center;
+  transition: color 0.2s ease;
+  padding: 4px;
+}
+
+.setup-skip-btn:hover { color: var(--text-secondary); }
+
+/* ── Web Push subscribe button ───────────────────────────── */
+.notif-subscribe-btn {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--gold);
+  border-radius: var(--radius-md);
+  font-family: 'Cinzel', serif;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  color: var(--gold);
+  background: var(--gold-dim);
+  transition: var(--transition);
+  text-align: center;
+  margin-bottom: 10px;
+}
+.notif-subscribe-btn:hover { background: var(--gold); color: var(--bg-base); }
+.notif-subscribe-btn.subscribed {
+  border-color: var(--border);
+  color: var(--text-tertiary);
+  background: var(--bg-elevated);
+  font-family: system-ui, sans-serif;
+  font-size: 12px;
+  letter-spacing: 0;
+}
+
+/* ── What you'll receive list ────────────────────────────── */
+.notif-what {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+.notif-what-item {
+  font-family: system-ui, sans-serif;
+  font-size: 12px;
+  color: var(--text-tertiary);
+  padding: 2px 0;
+}
+
+.notif-schedule {
+  font-family: system-ui, sans-serif;
+  font-size: 11px;
+  color: var(--text-tertiary);
+  padding: 6px 0 2px;
+  font-style: italic;
+}
+
+/* ══════════════════════════════════════════════════════════
+   CELEBRATION MODAL
+   ══════════════════════════════════════════════════════════ */
+
+#celebration-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 900;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+#celebration-modal.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.celebration-box {
+  position: relative;
+  overflow: hidden;
+  background: var(--bg-elevated);
+  border: 1px solid var(--gold);
+  border-radius: var(--radius-lg, 20px);
+  padding: 40px 36px 32px;
+  max-width: 340px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 0 60px rgba(212, 175, 55, 0.25), var(--shadow-card);
+  transform: scale(0.88) translateY(16px);
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+#celebration-modal.open .celebration-box {
+  transform: scale(1) translateY(0);
+}
+
+/* Particle container */
+.celebration-particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.celeb-particle {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  opacity: 0;
+  animation: celeb-fall 1.6s ease-out forwards;
+}
+
+@keyframes celeb-fall {
+  0%   { opacity: 1; transform: translateY(0) rotate(0deg) scale(1); }
+  80%  { opacity: 0.6; }
+  100% { opacity: 0; transform: translateY(160px) rotate(360deg) scale(0.4); }
+}
+
+/* Icon */
+.celebration-icon {
+  font-size: 56px;
+  line-height: 1;
+  margin-bottom: 12px;
+  animation: celeb-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.15s both;
+}
+
+@keyframes celeb-pop {
+  from { transform: scale(0.4); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+
+/* "Achievement Unlocked" label */
+.celebration-label {
+  font-family: 'Cinzel', serif;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 8px;
+}
+
+/* Achievement / goal name */
+.celebration-title {
+  font-family: 'Cinzel', serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+
+/* Subtitle / flavour text */
+.celebration-sub {
+  font-family: 'Crimson Pro', Georgia, serif;
+  font-size: 15px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 28px;
+  font-style: italic;
+}
+
+/* CTA button */
+.celebration-btn {
+  background: var(--gold);
+  color: #1a1008;
+  border: none;
+  border-radius: var(--radius-sm, 10px);
+  padding: 12px 32px;
+  font-family: 'Cinzel', serif;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s ease, transform 0.1s ease;
+  width: 100%;
+}
+
+.celebration-btn:hover  { opacity: 0.88; }
+.celebration-btn:active { transform: scale(0.97); }
+
+/* ══════════════════════════════════════════════════════════
+   NOTIFICATION ROWS (toggle + time picker)
+   ══════════════════════════════════════════════════════════ */
+
+.notif-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.notif-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--bg-base);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  transition: border-color 0.2s ease;
+}
+
+.notif-row:has(input[type="checkbox"]:checked) {
+  border-color: var(--gold);
+}
+
+.notif-row-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.notif-row-label {
+  flex: 1;
+  font-family: system-ui, sans-serif;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+/* Time picker */
+.notif-time-input {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-family: 'Cinzel', serif;
+  font-size: 12px;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+  width: 88px;
+  flex-shrink: 0;
+}
+
+.notif-time-input:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.notif-time-input:focus {
+  outline: none;
+  border-color: var(--gold);
+}
+
+/* Custom toggle switch */
+.notif-toggle-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.notif-toggle-wrap input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.notif-toggle-track {
+  width: 38px;
+  height: 22px;
+  background: var(--border-strong);
+  border-radius: 11px;
+  transition: background 0.25s ease;
+  position: relative;
+}
+
+.notif-toggle-track::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.25s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+.notif-toggle-wrap input:checked + .notif-toggle-track {
+  background: var(--gold);
+}
+
+.notif-toggle-wrap input:checked + .notif-toggle-track::after {
+  transform: translateX(16px);
+}
+
+.notif-toggle-wrap input:disabled + .notif-toggle-track {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* ============================================================
+   AUTH — Guest banner, signed-in card, auth modal
+   ============================================================ */
+
+/* ── Guest banner ─────────────────────────────────────────── */
+.profile-guest-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: var(--gold-dim);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+}
+
+.profile-guest-text {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.profile-guest-icon { font-size: 16px; flex-shrink: 0; }
+
+.profile-guest-text span:last-child {
+  font-family: system-ui, sans-serif;
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.profile-guest-btn {
+  flex-shrink: 0;
+  padding: 6px 14px;
+  background: var(--gold);
+  color: var(--bg-base);
+  border-radius: var(--radius-sm);
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  transition: var(--transition);
+}
+.profile-guest-btn:hover { background: var(--gold-light); }
+
+/* ── Signed-in card ───────────────────────────────────────── */
+.profile-signedin-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: rgba(58, 125, 123, 0.10);
+  border: 1px solid rgba(58, 125, 123, 0.25);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+}
+
+.profile-signedin-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.profile-signedin-synced {
+  font-family: system-ui, sans-serif;
+  font-size: 11px;
+  color: var(--teal-light);
+  font-weight: 600;
+}
+
+.profile-signedin-email {
+  font-family: system-ui, sans-serif;
+  font-size: 12px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.profile-signout-btn {
+  flex-shrink: 0;
+  padding: 6px 12px;
+  background: transparent;
+  color: var(--text-tertiary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: system-ui, sans-serif;
+  font-size: 11px;
+  white-space: nowrap;
+  transition: var(--transition);
+}
+.profile-signout-btn:hover { color: var(--text-primary); border-color: var(--border-strong); }
+
+/* ── Auth Modal ───────────────────────────────────────────── */
+.auth-modal-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 1000;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0;
+}
+.auth-modal-backdrop.open {
+  display: flex;
+}
+
+.auth-modal-card {
+  width: 100%;
+  max-width: 480px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  padding: 24px 20px 36px;
+}
+
+.auth-view {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.auth-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.auth-modal-title {
+  font-family: 'Cinzel', serif;
+  font-size: 16px;
+  color: var(--gold);
+  letter-spacing: 0.05em;
+}
+
+.auth-modal-close {
+  width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-tertiary);
+  font-size: 14px;
+  border-radius: var(--radius-sm);
+  transition: var(--transition);
+}
+.auth-modal-close:hover { color: var(--text-primary); background: var(--bg-surface); }
+
+.auth-input {
+  width: 100%;
+  background: var(--bg-base);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  font-family: system-ui, sans-serif;
+  font-size: 15px;
+  color: var(--text-primary);
+  transition: border-color 0.2s ease;
+}
+.auth-input:focus { border-color: var(--gold); outline: none; }
+.auth-input::placeholder { color: var(--text-tertiary); }
+
+.auth-btn-primary {
+  width: 100%;
+  padding: 13px;
+  background: var(--gold);
+  color: var(--bg-base);
+  border-radius: var(--radius-sm);
+  font-family: 'Cinzel', serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  transition: var(--transition);
+}
+.auth-btn-primary:hover:not(:disabled) { background: var(--gold-light); }
+.auth-btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.auth-link {
+  text-align: center;
+  font-family: system-ui, sans-serif;
+  font-size: 13px;
+  color: var(--text-secondary);
+  text-decoration: underline;
+  text-decoration-color: var(--border-strong);
+  padding: 4px;
+  transition: color 0.2s ease;
+}
+.auth-link:hover { color: var(--gold); }
+
+.auth-error {
+  font-family: system-ui, sans-serif;
+  font-size: 13px;
+  color: #e05b50;
+  min-height: 18px;
+  text-align: center;
+}
+
+.auth-success {
+  font-family: system-ui, sans-serif;
+  font-size: 13px;
+  color: var(--teal-light);
+  min-height: 18px;
+  text-align: center;
+}
+
+/* ── Signed-in read-only name display ────────────────────── */
+.profile-name-text {
+  font-family: 'Cinzel', serif;
+  font-size: 15px;
+  color: var(--text-primary);
+  letter-spacing: 0.03em;
+  padding: 9px 0;
+  display: block;
+}
+
+/* ============================================================
+   TILE PROGRESS — surah completion state on overview tiles
+   ============================================================ */
+
+/* Progress bar — shown for in-progress surahs */
+.tile-progress-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--border);
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  overflow: hidden;
+}
+.tile-progress-fill {
+  height: 100%;
+  background: var(--gold);
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  transition: width 0.4s ease;
+}
+
+/* Completion mark — shown for completed surahs */
+.tile-complete-mark {
+  position: absolute;
+  bottom: 6px;
+  right: 7px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--gold);
+  line-height: 1;
+  font-family: system-ui, sans-serif;
+  opacity: 0.9;
+}
+
+/* Completed tile — subtle gold tint */
+.surah-tile.completed {
+  border-color: rgba(240, 192, 96, 0.3);
+}
+.surah-tile.completed .surah-tile-num {
+  color: var(--gold);
+  opacity: 0.7;
+}
+
+/* ============================================================
+   KHATM UL QURAN — full-screen celebration modal
+   ============================================================ */
+
+.khatm-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.92);
+  z-index: 2000;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  overflow-y: auto;
+}
+.khatm-backdrop.open {
+  display: flex;
+}
+
+.khatm-particles {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 2001;
+}
+
+.khatm-particle {
+  position: absolute;
+  animation: khatmFall linear forwards;
+}
+@keyframes khatmFall {
+  0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+
+.khatm-card {
+  position: relative;
+  z-index: 2002;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  padding: 36px 28px 32px;
+  max-width: 420px;
+  width: 100%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 0 60px rgba(240, 192, 96, 0.15), 0 24px 48px rgba(0,0,0,0.5);
+}
+
+.khatm-ornament {
+  font-size: 32px;
+  color: var(--gold);
+  line-height: 1;
+  opacity: 0.8;
+}
+
+.khatm-arabic {
+  font-family: 'KFGQPC Uthmanic Script HAFS', 'Noto Naskh Arabic', serif;
+  font-size: 28px;
+  color: var(--gold);
+  direction: rtl;
+  line-height: 1.6;
+}
+
+.khatm-title {
+  font-family: 'Cinzel', serif;
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--text-primary);
+  letter-spacing: 0.06em;
+  margin: 0;
+}
+
+.khatm-sub {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 16px;
+  color: var(--text-secondary);
+  font-style: italic;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.khatm-divider {
+  width: 60px;
+  height: 1px;
+  background: var(--border-strong);
+  flex-shrink: 0;
+}
+
+.khatm-dua-label {
+  font-family: system-ui, sans-serif;
+  font-size: 11px;
+  color: var(--text-tertiary);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.khatm-dua-arabic {
+  font-family: 'KFGQPC Uthmanic Script HAFS', 'Noto Naskh Arabic', serif;
+  font-size: 20px;
+  color: var(--text-primary);
+  direction: rtl;
+  line-height: 2;
+  text-align: center;
+}
+
+.khatm-dua-trans {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 15px;
+  color: var(--text-secondary);
+  font-style: italic;
+  line-height: 1.7;
+  margin: 0;
+}
+
+.khatm-dua-attr {
+  font-family: system-ui, sans-serif;
+  font-size: 11px;
+  color: var(--text-tertiary);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.khatm-btn {
+  margin-top: 4px;
+  padding: 13px 28px;
+  background: var(--gold);
+  color: var(--bg-base);
+  border-radius: var(--radius-sm);
+  font-family: 'Cinzel', serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  transition: var(--transition);
+}
+.khatm-btn:hover { background: var(--gold-light); }

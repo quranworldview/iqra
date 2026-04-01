@@ -17,6 +17,17 @@
   font-display: block;
 }
 
+/* IndoPak Nastaleeq — self-hosted, v2.6554, 77KB                 */
+/* indopak-nastaleeq-waqf-lazim: full waqf/lazim/tajweed coverage */
+/* Paired with text_indopak_nastaleeq from the dedicated endpoint  */
+@font-face {
+  font-family: 'IndoPak Nastaleeq';
+  src: url('../fonts/IndoPakNastaleeq.woff2') format('woff2');
+  font-weight: normal;
+  font-style:  normal;
+  font-display: block;
+}
+
 /* ── Dark mode (default) ──────────────────────────────────── */
 :root {
   --bg-base:        #0D0F14;
@@ -96,6 +107,68 @@
 [data-lang="ur"] .ayah-translation { line-height: 2.5; }
 [data-lang="hi"] .ayah-translation { line-height: 2.0; }
 
+/* ── UI chrome font switching per language ───────────────── */
+/* Cinzel is Latin-only. In Urdu/Hindi mode, all UI labels    */
+/* must use a font that actually renders those scripts.        */
+
+/* Elements that use Cinzel in English */
+[data-lang="ur"] .bnb-label,
+[data-lang="ur"] .settings-section-title,
+[data-lang="ur"] .settings-btn,
+[data-lang="ur"] .settings-panel-title,
+[data-lang="ur"] .view-toggle-btn,
+[data-lang="ur"] .favourites-label,
+[data-lang="ur"] .all-surahs-label,
+[data-lang="ur"] .surah-tile-name,
+[data-lang="ur"] .surah-tile-meta,
+[data-lang="ur"] .surah-item-name,
+[data-lang="ur"] .overview-title,
+[data-lang="ur"] .overview-subtitle,
+[data-lang="ur"] .bookmarks-title,
+[data-lang="ur"] .bookmark-surah,
+[data-lang="ur"] #play-label,
+[data-lang="ur"] .goto-ayah-label,
+[data-lang="ur"] .goto-ayah-btn,
+[data-lang="ur"] .reciter-btn,
+[data-lang="ur"] .notif-row-label,
+[data-lang="ur"] [data-i18n] {
+  font-family: 'Noto Nastaliq Urdu', serif;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+[data-lang="hi"] .bnb-label,
+[data-lang="hi"] .settings-section-title,
+[data-lang="hi"] .settings-btn,
+[data-lang="hi"] .settings-panel-title,
+[data-lang="hi"] .view-toggle-btn,
+[data-lang="hi"] .favourites-label,
+[data-lang="hi"] .all-surahs-label,
+[data-lang="hi"] .surah-tile-name,
+[data-lang="hi"] .surah-tile-meta,
+[data-lang="hi"] .surah-item-name,
+[data-lang="hi"] .overview-title,
+[data-lang="hi"] .overview-subtitle,
+[data-lang="hi"] .bookmarks-title,
+[data-lang="hi"] .bookmark-surah,
+[data-lang="hi"] #play-label,
+[data-lang="hi"] .goto-ayah-label,
+[data-lang="hi"] .goto-ayah-btn,
+[data-lang="hi"] .reciter-btn,
+[data-lang="hi"] .notif-row-label,
+[data-lang="hi"] [data-i18n] {
+  font-family: 'Noto Sans Devanagari', sans-serif;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* Slightly larger UI text in Urdu — Nastaliq reads better bigger */
+[data-lang="ur"] .bnb-label,
+[data-lang="ur"] .settings-section-title,
+[data-lang="ur"] .surah-tile-name {
+  font-size: 14px;
+}
+
 /* ── Arabic text shaping — applies everywhere ────────────── */
 [lang="ar"],
 .ayah-arabic,
@@ -107,6 +180,33 @@
   text-rendering: optimizeLegibility;
   font-feature-settings: "calt" 1, "liga" 1, "rlig" 1, "mset" 1;
   -webkit-font-smoothing: antialiased;
+}
+
+/* ── Script switching — data-script="indopak" | "uthmani" ── */
+/* Default (indopak) → IndoPak Nastaleeq waqf-lazim v4.2.1   */
+.ayah-arabic,
+.bismillah-ornament,
+.surah-name-arabic,
+.surah-item-arabic,
+.nav-surah-arabic,
+.overview-surah-arabic {
+  font-family: 'IndoPak Nastaleeq', 'Noto Nastaliq Urdu', 'KFGQPC Uthmanic Script HAFS', serif;
+}
+
+/* IndoPak Nastaleeq needs more line height (stacked glyphs) */
+.ayah-arabic {
+  line-height: 2.6;
+}
+
+/* Uthmani → KFGQPC, tighter line height */
+[data-script="uthmani"] .ayah-arabic,
+[data-script="uthmani"] .bismillah-ornament,
+[data-script="uthmani"] .surah-name-arabic,
+[data-script="uthmani"] .surah-item-arabic,
+[data-script="uthmani"] .nav-surah-arabic,
+[data-script="uthmani"] .overview-surah-arabic {
+  font-family: 'KFGQPC Uthmanic Script HAFS', serif;
+  line-height: 2.2;
 }
 
 /* ── Translation font + direction per language ────────────── */

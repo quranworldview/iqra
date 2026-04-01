@@ -5,11 +5,14 @@
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
-  "orientation": "any",
   "background_color": "#0D0F14",
   "theme_color": "#0D0F14",
   "lang": "en",
-  "categories": ["education", "lifestyle", "religion"],
+  "categories": [
+    "education",
+    "lifestyle",
+    "religion"
+  ],
   "icons": [
     {
       "src": "./icons/favicon-32.png",

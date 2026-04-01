@@ -16,6 +16,8 @@ function toggleSettings() {
   } else {
     panel.classList.add('open');
     backdrop.classList.add('open');
+    // Refresh profile stats every time settings opens
+    if (typeof Profile !== 'undefined') Profile.updateSettingsUI();
   }
 }
 
