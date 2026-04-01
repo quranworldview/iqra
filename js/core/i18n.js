@@ -193,7 +193,8 @@ const STRINGS = {
                       'نیٹ ورک خرابی — کنکشن چیک کریں',
                       'नेटवर्क एरर — कनेक्शन चेक करें'],
   // ── Khatm + tile progress ─────────────────────────────────
-  ach_quran_complete: ['Khatm ul Quran 📖', 'ختم القرآن 📖', 'ख़तम القرآن 📖'],
+  ach_quran_complete: ['Khatm ul Quran 📖', 'ختم القرآن 📖', 'ख़तम القرآन 📖'],
+  khatm_number:       ['Khatm #{n}', 'ختم نمبر {n}', 'ख़तम #{n}'],
 
   auth_err_generic:  ['Something went wrong — please try again',
                       'کچھ غلط ہو گیا — دوبارہ کوشش کریں',

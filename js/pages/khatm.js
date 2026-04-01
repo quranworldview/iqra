@@ -10,9 +10,18 @@
 
 const Khatm = {
 
-  show() {
+  show(khatmNum) {
     const modal = document.getElementById('khatm-modal');
     if (!modal) return;
+
+    // Update count display
+    const countEl = document.getElementById('khatm-count');
+    if (countEl) {
+      countEl.textContent = khatmNum > 1
+        ? t('khatm_number').replace('{n}', khatmNum)
+        : '';
+    }
+
     modal.classList.add('open');
     this._burst();
   },

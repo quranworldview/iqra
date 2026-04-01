@@ -6,6 +6,8 @@
 
 const Profile = {
 
+  _khatmInProgress: false, // lock — prevents double-firing during async recordKhatm
+
   // ── Init — called on every app open ───────────────────────
   init() {
     // NOTE: streak is only incremented via recordReadingSession(),
@@ -103,12 +105,17 @@ const Profile = {
       newlyEarned.push({ id: 'surahs_10', icon: '✨', label: t('ach_surahs_10') });
     }
 
-    // 📖 Khatm ul Quran — all 114 surahs completed
-    if (getCompletedSurahCount() >= 114 && awardAchievement('quran_complete')) {
-      // Khatm gets its own full-screen celebration — not the standard badge modal
-      setTimeout(() => Khatm.show(), 800);
-      // Still push to achievements array for Firestore sync
-      newlyEarned.push({ id: 'quran_complete', icon: '📖', label: t('ach_quran_complete') });
+    // 📖 Khatm ul Quran — all 114 surahs completed (repeatable)
+    // Lock prevents double-firing since recordKhatm is async
+    if (getCompletedSurahCount() >= 114 && !this._khatmInProgress) {
+      this._khatmInProgress = true;
+      (async () => {
+        const khatmNum = await Progress.recordKhatm(); // resets surahs, writes Firestore
+        Profile.updateSettingsUI();                    // refresh 0/114 counter immediately
+        Overview.render();                             // refresh tiles — all clean again
+        setTimeout(() => Khatm.show(khatmNum), 600);  // full-screen celebration
+        Profile._khatmInProgress = false;              // release lock
+      })();
     }
 
     // 🏅 Goal met — repeatable per period (daily/weekly/monthly)

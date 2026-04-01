@@ -325,7 +325,7 @@ a:hover { color: var(--gold-light); }
   align-items: center;
   gap: 14px;
   position: sticky;
-  top: 0;
+  top: var(--nav-h);
   z-index: 100;
   transition: padding 0.25s ease, box-shadow 0.25s ease;
 }
@@ -3226,3 +3226,13 @@ a:hover { color: var(--gold-light); }
   transition: var(--transition);
 }
 .khatm-btn:hover { background: var(--gold-light); }
+
+/* Khatm count — shown on 2nd khatm onwards (e.g. "Khatm #2") */
+.khatm-count {
+  font-family: 'Cinzel', serif;
+  font-size: 13px;
+  color: var(--gold);
+  letter-spacing: 0.1em;
+  margin: 0;
+  min-height: 18px;
+}

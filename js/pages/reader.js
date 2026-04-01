@@ -54,20 +54,12 @@ const Reader = {
       // If caller passed startAyah=1 (e.g. from Overview tile tap) BUT the surah
       // is already marked complete, honour the explicit scroll-to-start but do NOT
       // overwrite the saved lastAyah so the completion record is preserved.
+      // Always resume from the position caller specifies.
+      // Overview.openSurah() passes loadLastAyah(num) so resume works naturally.
+      // prev/next arrows pass nothing → fall back to savedAyah.
       const savedAyah = loadLastAyah(num);
-      const surahComplete = isSurahCompleted(num); // timestamp-based, never cleared
-      let target;
-      if (startAyah && startAyah === 1 && surahComplete) {
-        // User tapped a completed surah from Overview — start at top visually
-        // but keep savedAyah intact in memory so _savePosition doesn't regress it
-        target = 1;
-        this.state.currentAyah = 1;
-        // Re-stamp the full completion so localStorage stays correct
-        saveLastAyah(num, getSurahMeta(num).ayahs);
-      } else {
-        target = startAyah || savedAyah;
-        this.state.currentAyah = Math.min(target, ayahs.length);
-      }
+      const target    = startAyah || savedAyah;
+      this.state.currentAyah = Math.min(target, ayahs.length);
       this.renderAyahs();
       this._scrollToAyah(target, 'instant');
       prefetchSurah(num - 1);

@@ -104,6 +104,35 @@ const Progress = {
       .catch(e => console.warn('[Iqra progress] notif prefs write failed:', e));
   },
 
+  // ── Record Khatm ul Quran ─────────────────────────────────
+  // Called from profile.js when all 114 surahs are completed.
+  // 1. Increments khatm_count in localStorage + Firestore
+  // 2. Clears all surahs_read (fresh start for next khatm)
+  // 3. Appends entry to khatm_history in Firestore
+  // Returns the new khatm count.
+  async recordKhatm() {
+    const count = awardKhatm();          // localStorage: count + achievement stamp
+    resetKhatmSurahs();                  // localStorage: clear 114 completed_at keys
+
+    if (!this.uid) return count;
+
+    const now = firebase.firestore.FieldValue.serverTimestamp();
+    await db.collection(COLLECTIONS.IQRA_PROGRESS).doc(this.uid)
+      .set({
+        khatm_count:  count,
+        surahs_read:  [],               // reset for next khatm
+        achievements: loadAchievements().map(a => a.id),
+        khatm_history: firebase.firestore.FieldValue.arrayUnion({
+          count:        count,
+          completed_at: new Date().toISOString(),
+        }),
+        updated_at: now,
+      }, { merge: true })
+      .catch(e => console.warn('[Iqra progress] khatm write failed:', e));
+
+    return count;
+  },
+
   // ── Save bookmark ─────────────────────────────────────────
   async saveBookmark(bookmark) {
     // bookmark: { id, surahNum, ayahNum, arabic, note, savedAt }
@@ -163,7 +192,16 @@ const Progress = {
           saveStreak(remoteStreak);
         }
 
-        // Surahs read — union of both sets
+        // Khatm count — if Firestore is ahead, it means a khatm happened
+        // on another device → clear local completed_at keys to match
+        const localKhatmCount  = loadKhatmCount();
+        const remoteKhatmCount = d.khatm_count || 0;
+        if (remoteKhatmCount > localKhatmCount) {
+          resetKhatmSurahs();                        // clear stale local completion stamps
+          saveKhatmCount(remoteKhatmCount);
+        }
+
+        // Surahs read — union of both sets (within current khatm only)
         if (d.surahs_read?.length) {
           d.surahs_read.forEach(n => markSurahCompleted(n));
         }
@@ -230,6 +268,8 @@ const Progress = {
         longest_streak: streak.longest  || 0,
         last_read_date: streak.lastDate || new Date().toISOString().slice(0, 10),
         surahs_read:    completed,
+        khatm_count:    loadKhatmCount(),
+        khatm_history:  [],
         achievements:   achievements,
         favourites:     loadFavourites(),
         reading_goal: goal ? {

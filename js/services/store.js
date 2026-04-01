@@ -150,6 +150,38 @@ function isSurahCompleted(surahNum) {
   return getSurahCompletedAt(surahNum) !== null;
 }
 
+// ── Khatm ul Quran ────────────────────────────────────────
+// khatm_count: total khatms completed — never resets
+// Surah completed_at_N keys are cleared on each khatm
+
+function loadKhatmCount()      { return parseInt(_get('khatm_count') || '0'); }
+function saveKhatmCount(n)     { _set('khatm_count', String(n)); }
+
+// Clear all 114 completed_at_N AND last_ayah_N keys — full clean slate for next khatm
+function resetKhatmSurahs() {
+  for (let i = 1; i <= 114; i++) {
+    _del('completed_at_' + i);
+    _del('last_ayah_'    + i);  // also clear position so tiles start fresh
+  }
+}
+
+// Award a khatm — stamps quran_complete_N (repeatable) AND
+// a permanent quran_complete badge (for the achievements panel display).
+// Returns the new khatm count.
+function awardKhatm() {
+  const count  = loadKhatmCount() + 1;
+  saveKhatmCount(count);
+  // Stamp this specific khatm
+  const arr = loadAchievements();
+  arr.push({ id: 'quran_complete_' + count, earnedAt: Date.now() });
+  // Stamp / keep the permanent badge
+  if (!arr.some(a => a.id === 'quran_complete')) {
+    arr.push({ id: 'quran_complete', earnedAt: Date.now() });
+  }
+  saveAchievements(arr);
+  return count;
+}
+
 // ── Achievements ──────────────────────────────────────────
 // Array of { id, earnedAt }
 function loadAchievements() {

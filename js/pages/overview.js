@@ -112,10 +112,11 @@ const Overview = {
 
   openSurah(num) {
     showPage('reader');
-    // Completed → re-read from ayah 1 (fresh start)
-    // In progress → resume from saved position
-    const startAyah = isSurahCompleted(num) ? 1 : (loadLastAyah(num) || 1);
-    Reader.loadSurah(num, startAyah);
+    // Always resume from saved position — completed or not.
+    // After a khatm reset, loadLastAyah returns the last ayah
+    // of the previous read, which is fine — user can scroll up.
+    // The tile ✓ is visual-only; it doesn't change where you resume.
+    Reader.loadSurah(num, loadLastAyah(num) || 1);
   },
 
   openJuz(juzNum) {
