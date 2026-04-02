@@ -133,6 +133,17 @@ const Progress = {
     return count;
   },
 
+  // ── Save favourites ──────────────────────────────────────────
+  async saveFavourites() {
+    if (!this.uid) return;
+    await db.collection(COLLECTIONS.IQRA_PROGRESS).doc(this.uid)
+      .set({
+        favourites: loadFavourites(),
+        updated_at: firebase.firestore.FieldValue.serverTimestamp(),
+      }, { merge: true })
+      .catch(e => console.warn('[Iqra progress] favourites write failed:', e));
+  },
+
   // ── Save bookmark ─────────────────────────────────────────
   async saveBookmark(bookmark) {
     // bookmark: { id, surahNum, ayahNum, arabic, note, savedAt }
@@ -212,6 +223,13 @@ const Progress = {
           d.achievements.forEach(id => {
             if (!existing.includes(id)) awardAchievement(id);
           });
+        }
+
+        // Favourites — union of both sets
+        if (d.favourites?.length) {
+          const localFavs = loadFavourites();
+          const merged = [...new Set([...localFavs, ...d.favourites])];
+          saveFavourites(merged);
         }
 
         // Settings — only apply if not locally set

@@ -86,12 +86,16 @@ const Overview = {
     const revLabel    = s.revelation === 'Makkan' ? t('makkan') : t('madinan');
     const isCompleted = isSurahCompleted(s.num);
     const lastAyah    = loadLastAyah(s.num) || 0;
-    const pct         = isCompleted ? 100 : (lastAyah > 1 ? Math.round((lastAyah / s.ayahs) * 100) : 0);
-    const inProgress  = !isCompleted && pct > 0;
+    // A surah shows ✓ only if completed AND not currently mid-re-read.
+    // If user has started re-reading (lastAyah < total ayahs), show bar instead.
+    const atEnd       = lastAyah >= s.ayahs;
+    const showTick    = isCompleted && atEnd;
+    const pct         = lastAyah > 1 ? Math.round((lastAyah / s.ayahs) * 100) : 0;
+    const showBar     = !showTick && pct > 0;
 
-    const progressHTML = isCompleted
+    const progressHTML = showTick
       ? `<div class="tile-complete-mark">&#x2713;</div>`
-      : inProgress
+      : showBar
         ? `<div class="tile-progress-bar"><div class="tile-progress-fill" style="width:${pct}%"></div></div>`
         : '';
 
@@ -127,6 +131,7 @@ const Overview = {
 
   toggleFav(surahNum) {
     toggleFavourite(surahNum);
+    Progress.saveFavourites(); // sync to Firestore
     this.render(); // Re-render to update heart + favourites section
   },
 

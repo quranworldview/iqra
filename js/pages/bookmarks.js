@@ -66,7 +66,10 @@ const Bookmarks = {
   },
 
   remove(id) {
+    // Find bookmark to get surah/ayah for Firestore delete
+    const bm = loadBookmarks().find(b => b.id === id);
     removeBookmark(id);
+    if (bm) Progress.deleteBookmark(id, bm.surahNum, bm.ayahNum);
     this.render();
     // Refresh bookmark icons in reader if visible
     if (Reader.state.ayahs.length) Reader._refreshBookmarkIcons();
@@ -108,7 +111,8 @@ const Bookmarks = {
     const ayah   = parseInt(sheet.dataset.ayah);
     const arabic = sheet.dataset.arabic;
     const note   = document.getElementById('bookmark-note-input')?.value || '';
-    addBookmark(surah, ayah, arabic, note);
+    const bm = addBookmark(surah, ayah, arabic, note);
+    Progress.saveBookmark(bm); // sync to Firestore
     this.closeSheet();
     Reader._refreshBookmarkIcons();
     // Show a brief toast
