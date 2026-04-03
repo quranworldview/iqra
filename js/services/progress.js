@@ -168,7 +168,7 @@ const Progress = {
     const bm = loadBookmarks().find(b => b.id === id);
     if (bm?.visibility === 'published' && this.uid) {
       const reflId = 'iqra_' + this.uid + '_' + surahNum + '_' + ayahNum;
-      await db.collection('user_reflections').doc(reflId)
+      await db.collection(COLLECTIONS.USER_REFLECTIONS).doc(reflId)
         .delete()
         .catch(e => console.warn('[Iqra progress] unpublish on delete failed:', e));
       // Decrement published count
@@ -187,23 +187,39 @@ const Progress = {
 
   // ── Publish a reflection → user_reflections collection ────
   async publishReflection(reflection, userName) {
-    // reflection: { id, surahNum, ayahNum, arabic, note, savedAt }
+    // reflection: { id, surahNum, ayahNum, arabic, note, title, savedAt, visibility }
     setReflectionVisibility(reflection.id, 'published'); // localStorage
     if (!this.uid) return;
+
     const bmId   = reflection.surahNum + '_' + reflection.ayahNum;
     const reflId = 'iqra_' + this.uid + '_' + bmId;
 
+    // Build surah_name map from SURAHS data — matches Dashboard schema exactly
+    const meta       = typeof getSurahMeta === 'function' ? getSurahMeta(reflection.surahNum) : null;
+    const surahName  = meta
+      ? { en: meta.name[0] || '', ur: meta.name[1] || '', hi: meta.name[2] || '' }
+      : { en: '', ur: '', hi: '' };
+
+    const lang = typeof currentLang !== 'undefined' ? currentLang : 'en';
+
     const batch = db.batch();
 
-    // Write to user_reflections — same collection Dashboard uses
-    batch.set(db.collection('user_reflections').doc(reflId), {
-      uid:         this.uid,
-      author_name: userName || 'Anonymous',
-      text:        reflection.note,
-      surah:       reflection.surahNum,
-      ayah:        reflection.ayahNum,
-      source_app:  'iqra',
-      status:      'pending',   // admin reviews before Library
+    // ── user_reflections — exact Dashboard field schema ───────
+    batch.set(db.collection(COLLECTIONS.USER_REFLECTIONS).doc(reflId), {
+      uid:          this.uid,
+      author_name:  userName || 'Anonymous',
+      title:        reflection.title  || '',       // user-entered title
+      body:         reflection.note   || '',       // renamed from 'text' to match Dashboard
+      surah:        reflection.surahNum,
+      ayah:         reflection.ayahNum,
+      surah_name:   surahName,                     // { en, ur, hi } map
+      language:     lang,                          // user's current language
+      stage:        1,                             // Iqra is always Stage 1
+      app_source:   'iqra',                        // matches Dashboard 'app_source' key
+      published_as: 'named',                       // user is identified by name
+      theme_tags:   [],                            // tagging not available in Iqra yet
+      status:       'pending',                     // admin reviews before Library
+      updated_by:   this.uid,
       submitted_at: firebase.firestore.FieldValue.serverTimestamp(),
     });
 
@@ -227,7 +243,6 @@ const Progress = {
     await batch.commit()
       .catch(e => console.warn('[Iqra progress] publish reflection failed:', e));
   },
-
   // ── Unpublish a reflection ────────────────────────────────
   async unpublishReflection(reflection) {
     setReflectionVisibility(reflection.id, 'private'); // localStorage

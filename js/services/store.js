@@ -72,20 +72,20 @@ function loadBookmarks() {
 }
 function saveBookmarks(arr)    { _set('bookmarks', JSON.stringify(arr)); }
 
-function addBookmark(surahNum, ayahNum, arabic, note) {
+function addBookmark(surahNum, ayahNum, arabic, note, title) {
   const bm = loadBookmarks();
-  // Prevent duplicate on same ayah — update note if exists
   const exists = bm.find(b => b.surahNum === surahNum && b.ayahNum === ayahNum);
   if (exists) {
     exists.note    = note || exists.note;
+    exists.title   = title || exists.title || '';
     exists.savedAt = Date.now();
     saveBookmarks(bm);
     return exists;
   }
   const entry = {
     id: Date.now(), surahNum, ayahNum, arabic,
-    note: note || '', savedAt: Date.now(),
-    visibility: 'private',   // always private on creation
+    note: note || '', title: title || '', savedAt: Date.now(),
+    visibility: 'private',
   };
   bm.unshift(entry);
   saveBookmarks(bm);

@@ -65,6 +65,7 @@ const STRINGS = {
   no_bookmarks_body:          ['Long-press any Ayah to save your reflection.', 'کسی بھی آیت کو لمبا دبائیں۔', 'किसी भी आयत को देर तक दबाएं।'],
   bookmark_saved:             ['Reflection saved',              'خیال محفوظ',                 'विचार सेव हुआ'],
   bookmark_note:              ['Write your reflection…',        'اپنا خیال لکھیں…',           'अपना विचार लिखें…'],
+  reflection_title_placeholder: ['Give it a title…',           'عنوان دیں…',                 'शीर्षक दें…'],
   save_bookmark:              ['Save Reflection',               'خیال محفوظ کریں',            'विचार सेव करें'],
   go_to_ayah:                 ['Go to Ayah',                   'آیت پر جائیں',               'आयत पर जाएं'],
   remove:                     ['Remove',                       'ہٹائیں',                     'हटाएं'],

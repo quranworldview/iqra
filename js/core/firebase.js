@@ -26,8 +26,9 @@ const auth = firebase.auth();
 
 // ── Collection name constants — prevents typos ─────────────
 const COLLECTIONS = {
-  USERS:          'users',
-  IQRA_PROGRESS:  'iqra_progress',
-  CONFIG:         'config',
-  NOTIFICATIONS:  'notifications',
+  USERS:            'users',
+  IQRA_PROGRESS:    'iqra_progress',
+  USER_REFLECTIONS: 'user_reflections',
+  CONFIG:           'config',
+  NOTIFICATIONS:    'notifications',
 };

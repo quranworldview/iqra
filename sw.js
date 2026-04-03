@@ -12,7 +12,7 @@
 //   Audio MP3s  → Cache First (replay without re-downloading)
 // ============================================================
 
-const APP_VERSION = 'iqra-v7.9';
+const APP_VERSION = 'iqra-v7.9.1';
 const SHELL_CACHE = APP_VERSION + '-shell';
 const API_CACHE   = APP_VERSION + '-api';
 const AUDIO_CACHE = APP_VERSION + '-audio';
@@ -99,8 +99,18 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Firebase CDN — never intercept, always network
-  if (url.hostname === 'www.gstatic.com' || url.hostname.endsWith('.firebaseapp.com') || url.hostname.endsWith('.googleapis.com')) {
+  // Prayer times API — always network, no caching
+  if (url.hostname === 'api.aladhan.com') {
+    event.respondWith(fetch(request));
+    return;
+  }
+
+  // Firebase / Firestore / GCP — never intercept, always network
+  if (url.hostname === 'www.gstatic.com'
+      || url.hostname.endsWith('.firebaseapp.com')
+      || url.hostname.endsWith('.firebaseio.com')
+      || url.hostname === 'firestore.googleapis.com'
+      || url.hostname.endsWith('.googleapis.com')) {
     event.respondWith(fetch(request));
     return;
   }

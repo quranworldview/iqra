@@ -65,6 +65,7 @@ const Bookmarks = {
           </div>
           <div class="bookmark-arabic" lang="ar" dir="rtl">${b.arabic || ''}</div>
           ${b.note ? `<div class="bookmark-note">${b.note}</div>` : ''}
+          ${b.title ? `<div class="bookmark-card-user-title">${b.title}</div>` : ''}
           <div class="bookmark-actions">
             <button class="bookmark-goto-btn" onclick="Bookmarks.goTo(${b.surahNum}, ${b.ayahNum})">
               ${t('go_to_ayah')}
@@ -121,7 +122,6 @@ const Bookmarks = {
     if (Reader.state.ayahs.length) Reader._refreshBookmarkIcons();
   },
 
-  // Opens the reflection sheet for a given ayah
   openSheet(surahNum, ayahNum, arabic) {
     const sheet = document.getElementById('bookmark-sheet');
     if (!sheet) return;
@@ -129,19 +129,26 @@ const Bookmarks = {
     sheet.dataset.ayah   = ayahNum;
     sheet.dataset.arabic = arabic;
 
-    const noteEl = document.getElementById('bookmark-note-input');
     const existing = loadBookmarks().find(b => b.surahNum === surahNum && b.ayahNum === ayahNum);
+
+    const titleEl = document.getElementById('bookmark-title-input');
+    if (titleEl) titleEl.value = existing?.title || '';
+
+    const noteEl = document.getElementById('bookmark-note-input');
     if (noteEl) noteEl.value = existing?.note || '';
 
-    const titleEl = document.getElementById('bookmark-sheet-title');
-    if (titleEl) {
+    const headerEl = document.getElementById('bookmark-sheet-title');
+    if (headerEl) {
       const meta    = getSurahMeta(surahNum);
       const langIdx = currentLang === 'ur' ? 1 : currentLang === 'hi' ? 2 : 0;
-      titleEl.textContent = (meta.name[langIdx] || meta.name[0]) + ' · ' + t('ayah_label') + ' ' + ayahNum;
+      headerEl.textContent = (meta.name[langIdx] || meta.name[0]) + ' · ' + t('ayah_label') + ' ' + ayahNum;
     }
 
     sheet.classList.add('open');
     document.getElementById('bookmark-sheet-backdrop')?.classList.add('open');
+
+    // Focus title first — nudge the student to name their thought
+    setTimeout(() => titleEl?.focus(), 350);
   },
 
   closeSheet() {
@@ -155,8 +162,9 @@ const Bookmarks = {
     const surah  = parseInt(sheet.dataset.surah);
     const ayah   = parseInt(sheet.dataset.ayah);
     const arabic = sheet.dataset.arabic;
+    const title  = document.getElementById('bookmark-title-input')?.value.trim() || '';
     const note   = document.getElementById('bookmark-note-input')?.value || '';
-    const bm     = addBookmark(surah, ayah, arabic, note);
+    const bm     = addBookmark(surah, ayah, arabic, note, title);
     Progress.saveBookmark(bm);
     this.closeSheet();
     Reader._refreshBookmarkIcons();
