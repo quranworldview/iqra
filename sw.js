@@ -12,7 +12,7 @@
 //   Audio MP3s  → Cache First (replay without re-downloading)
 // ============================================================
 
-const APP_VERSION = 'iqra-v7.8';
+const APP_VERSION = 'iqra-v7.9';
 const SHELL_CACHE = APP_VERSION + '-shell';
 const API_CACHE   = APP_VERSION + '-api';
 const AUDIO_CACHE = APP_VERSION + '-audio';
@@ -34,6 +34,7 @@ const SHELL_FILES = [
   './js/services/quran-api.js',
   './js/services/offline.js',
   './js/services/notifications.js',
+  './js/services/notif-cards.js',
   './js/services/webpush.js',
   './js/core/firebase.js',
   './js/core/auth.js',

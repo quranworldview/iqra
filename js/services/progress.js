@@ -144,9 +144,9 @@ const Progress = {
       .catch(e => console.warn('[Iqra progress] favourites write failed:', e));
   },
 
-  // ── Save bookmark ─────────────────────────────────────────
+  // ── Save reflection (formerly bookmark) ───────────────────
   async saveBookmark(bookmark) {
-    // bookmark: { id, surahNum, ayahNum, arabic, note, savedAt }
+    // bookmark: { id, surahNum, ayahNum, arabic, note, savedAt, visibility }
     addBookmark(bookmark.surahNum, bookmark.ayahNum, bookmark.arabic, bookmark.note);
     if (!this.uid) return;
     const bmId = bookmark.surahNum + '_' + bookmark.ayahNum;
@@ -156,20 +156,109 @@ const Progress = {
         surah_number: bookmark.surahNum,
         ayah_number:  bookmark.ayahNum,
         note:         bookmark.note || null,
+        visibility:   'private',
         created_at:   firebase.firestore.FieldValue.serverTimestamp(),
       })
-      .catch(e => console.warn('[Iqra progress] bookmark write failed:', e));
+      .catch(e => console.warn('[Iqra progress] reflection write failed:', e));
   },
 
-  // ── Delete bookmark ───────────────────────────────────────
+  // ── Delete reflection ─────────────────────────────────────
   async deleteBookmark(id, surahNum, ayahNum) {
+    // If it was published, unpublish it first (remove from user_reflections)
+    const bm = loadBookmarks().find(b => b.id === id);
+    if (bm?.visibility === 'published' && this.uid) {
+      const reflId = 'iqra_' + this.uid + '_' + surahNum + '_' + ayahNum;
+      await db.collection('user_reflections').doc(reflId)
+        .delete()
+        .catch(e => console.warn('[Iqra progress] unpublish on delete failed:', e));
+      // Decrement published count
+      await db.collection(COLLECTIONS.IQRA_PROGRESS).doc(this.uid)
+        .set({ published_reflections_count: firebase.firestore.FieldValue.increment(-1), updated_at: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true })
+        .catch(() => {});
+    }
     removeBookmark(id); // localStorage always
     if (!this.uid) return;
     const bmId = surahNum + '_' + ayahNum;
     await db.collection(COLLECTIONS.IQRA_PROGRESS).doc(this.uid)
       .collection('bookmarks').doc(bmId)
       .delete()
-      .catch(e => console.warn('[Iqra progress] bookmark delete failed:', e));
+      .catch(e => console.warn('[Iqra progress] reflection delete failed:', e));
+  },
+
+  // ── Publish a reflection → user_reflections collection ────
+  async publishReflection(reflection, userName) {
+    // reflection: { id, surahNum, ayahNum, arabic, note, savedAt }
+    setReflectionVisibility(reflection.id, 'published'); // localStorage
+    if (!this.uid) return;
+    const bmId   = reflection.surahNum + '_' + reflection.ayahNum;
+    const reflId = 'iqra_' + this.uid + '_' + bmId;
+
+    const batch = db.batch();
+
+    // Write to user_reflections — same collection Dashboard uses
+    batch.set(db.collection('user_reflections').doc(reflId), {
+      uid:         this.uid,
+      author_name: userName || 'Anonymous',
+      text:        reflection.note,
+      surah:       reflection.surahNum,
+      ayah:        reflection.ayahNum,
+      source_app:  'iqra',
+      status:      'pending',   // admin reviews before Library
+      submitted_at: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+
+    // Update bookmark visibility in subcollection
+    batch.set(
+      db.collection(COLLECTIONS.IQRA_PROGRESS).doc(this.uid).collection('bookmarks').doc(bmId),
+      { visibility: 'published', updated_at: firebase.firestore.FieldValue.serverTimestamp() },
+      { merge: true }
+    );
+
+    // Increment published count on progress doc
+    batch.set(
+      db.collection(COLLECTIONS.IQRA_PROGRESS).doc(this.uid),
+      {
+        published_reflections_count: firebase.firestore.FieldValue.increment(1),
+        updated_at: firebase.firestore.FieldValue.serverTimestamp(),
+      },
+      { merge: true }
+    );
+
+    await batch.commit()
+      .catch(e => console.warn('[Iqra progress] publish reflection failed:', e));
+  },
+
+  // ── Unpublish a reflection ────────────────────────────────
+  async unpublishReflection(reflection) {
+    setReflectionVisibility(reflection.id, 'private'); // localStorage
+    if (!this.uid) return;
+    const bmId   = reflection.surahNum + '_' + reflection.ayahNum;
+    const reflId = 'iqra_' + this.uid + '_' + bmId;
+
+    const batch = db.batch();
+
+    // Remove from user_reflections
+    batch.delete(db.collection('user_reflections').doc(reflId));
+
+    // Update visibility in subcollection
+    batch.set(
+      db.collection(COLLECTIONS.IQRA_PROGRESS).doc(this.uid).collection('bookmarks').doc(bmId),
+      { visibility: 'private', updated_at: firebase.firestore.FieldValue.serverTimestamp() },
+      { merge: true }
+    );
+
+    // Decrement published count
+    batch.set(
+      db.collection(COLLECTIONS.IQRA_PROGRESS).doc(this.uid),
+      {
+        published_reflections_count: firebase.firestore.FieldValue.increment(-1),
+        updated_at: firebase.firestore.FieldValue.serverTimestamp(),
+      },
+      { merge: true }
+    );
+
+    await batch.commit()
+      .catch(e => console.warn('[Iqra progress] unpublish reflection failed:', e));
   },
 
   // ── Save name ─────────────────────────────────────────────

@@ -77,6 +77,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Init notifications — checks permission, reschedules active ones
   await Notifications.init();
 
+  // In-app notification cards — works on all platforms
+  await NotifCards.init();
+
   // Handle tap on a notification (URL params)
   Notifications.handleNotifClick();
 

@@ -64,8 +64,9 @@ function toggleFavourite(surahNum) {
   return idx === -1; // true = now favourite
 }
 
-// ── Bookmarks ─────────────────────────────────────────────
-// Each bookmark: { id, surahNum, ayahNum, arabic, note, savedAt }
+// ── Reflections (formerly Bookmarks) ──────────────────────
+// Each reflection: { id, surahNum, ayahNum, arabic, note, savedAt, visibility }
+// visibility: 'private' (default) | 'published'
 function loadBookmarks() {
   try { return JSON.parse(_get('bookmarks') || '[]'); } catch(e) { return []; }
 }
@@ -73,7 +74,7 @@ function saveBookmarks(arr)    { _set('bookmarks', JSON.stringify(arr)); }
 
 function addBookmark(surahNum, ayahNum, arabic, note) {
   const bm = loadBookmarks();
-  // Prevent duplicate on same ayah
+  // Prevent duplicate on same ayah — update note if exists
   const exists = bm.find(b => b.surahNum === surahNum && b.ayahNum === ayahNum);
   if (exists) {
     exists.note    = note || exists.note;
@@ -81,7 +82,11 @@ function addBookmark(surahNum, ayahNum, arabic, note) {
     saveBookmarks(bm);
     return exists;
   }
-  const entry = { id: Date.now(), surahNum, ayahNum, arabic, note: note || '', savedAt: Date.now() };
+  const entry = {
+    id: Date.now(), surahNum, ayahNum, arabic,
+    note: note || '', savedAt: Date.now(),
+    visibility: 'private',   // always private on creation
+  };
   bm.unshift(entry);
   saveBookmarks(bm);
   return entry;
@@ -93,6 +98,22 @@ function removeBookmark(id) {
 
 function isBookmarked(surahNum, ayahNum) {
   return loadBookmarks().some(b => b.surahNum === surahNum && b.ayahNum === ayahNum);
+}
+
+// Set visibility on a reflection (locally)
+function setReflectionVisibility(id, visibility) {
+  const bm = loadBookmarks();
+  const entry = bm.find(b => b.id === id);
+  if (entry) {
+    entry.visibility = visibility;
+    saveBookmarks(bm);
+  }
+  return entry;
+}
+
+// Count how many reflections are currently published (for Firestore sync)
+function countPublishedReflections() {
+  return loadBookmarks().filter(b => b.visibility === 'published').length;
 }
 
 // ── Offline cached surahs ─────────────────────────────────

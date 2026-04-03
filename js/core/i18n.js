@@ -35,7 +35,7 @@ const STRINGS = {
   // Navigation
   overview:          ['Overview',                    'جائزہ',                     'जायज़ा'],
   reader:            ['Reader',                      'قرآن',                      'क़ुरआन'],
-  bookmarks:         ['Bookmarks',                   'بک مارکس',                  'बुकमार्क्स'],
+  bookmarks:         ['Reflections',                 'میرے خیالات',               'मेरे विचार'],
 
   // Overview
   surah_view:        ['Surahs',                      'سورتیں',                    'सूरहें'],
@@ -60,14 +60,25 @@ const STRINGS = {
   sajdah:            ['Sajdah',                      'سجدہ',                      'सज्दा'],
   juz_label:         ['Juz',                         'پارہ',                      'पारा'],
 
-  // Bookmarks
-  no_bookmarks:      ['No bookmarks yet',            'ابھی کوئی بک مارک نہیں',   'अभी कोई बुकमार्क नहीं'],
-  no_bookmarks_body: ['Long-press any Ayah to bookmark it.', 'کسی بھی آیت کو لمبا دبائیں۔', 'किसी भी आयत को देर तक दबाएं।'],
-  bookmark_saved:    ['Bookmark saved',              'بک مارک محفوظ',             'बुकमार्क सेव'],
-  bookmark_note:     ['Add a note… (optional)',      'نوٹ لکھیں… (اختیاری)',       'नोट लिखें… (वैकल्पिक)'],
-  save_bookmark:     ['Save Bookmark',               'بک مارک محفوظ کریں',        'बुकमार्क सेव करें'],
-  go_to_ayah:        ['Go to Ayah',                  'آیت پر جائیں',              'आयत पर जाएं'],
-  remove:            ['Remove',                      'ہٹائیں',                    'हटाएं'],
+  // Reflections (formerly Bookmarks)
+  no_bookmarks:               ['No reflections yet',            'ابھی کوئی خیال نہیں',        'अभी कोई विचार नहीं'],
+  no_bookmarks_body:          ['Long-press any Ayah to save your reflection.', 'کسی بھی آیت کو لمبا دبائیں۔', 'किसी भी आयत को देर तक दबाएं।'],
+  bookmark_saved:             ['Reflection saved',              'خیال محفوظ',                 'विचार सेव हुआ'],
+  bookmark_note:              ['Write your reflection…',        'اپنا خیال لکھیں…',           'अपना विचार लिखें…'],
+  save_bookmark:              ['Save Reflection',               'خیال محفوظ کریں',            'विचार सेव करें'],
+  go_to_ayah:                 ['Go to Ayah',                   'آیت پر جائیں',               'आयत पर जाएं'],
+  remove:                     ['Remove',                       'ہٹائیں',                     'हटाएं'],
+  // Publish / private
+  published:                  ['Published',                    'شائع',                       'प्रकाशित'],
+  private:                    ['Private',                      'ذاتی',                       'निजी'],
+  publish_reflection:         ['Publish',                      'شائع کریں',                  'प्रकाशित करें'],
+  make_private:               ['Make Private',                 'ذاتی کریں',                  'निजी करें'],
+  publish_info:               ['Shared with QWV — may appear in the Library.', 'QWV کے ساتھ شیئر — لائبریری میں آ سکتا ہے۔', 'QWV के साथ शेयर — लाइब्रेरी में आ सकता है।'],
+  reflection_published:       ['Reflection published ✦',       'خیال شائع ہو گیا ✦',         'विचार प्रकाशित हुआ ✦'],
+  made_private:               ['Moved to private',             'ذاتی کر دیا',                'निजी कर दिया'],
+  reflection_needs_note:      ['Add a note before publishing.','شائع کرنے سے پہلے کچھ لکھیں۔','प्रकाशित करने से पहले कुछ लिखें।'],
+  reflections_count:          ['{total} reflections · {published} published', '{total} خیالات · {published} شائع', '{total} विचार · {published} प्रकाशित'],
+  reflections_count_none_published: ['{total} reflections · none published yet', '{total} خیالات · ابھی کوئی شائع نہیں', '{total} विचार · अभी कोई प्रकाशित नहीं'],
 
 
   // Profile

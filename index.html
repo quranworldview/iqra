@@ -99,10 +99,10 @@
   <main id="ayah-container" role="main"></main>
 </div>
 
-<!-- ── Bookmarks Page ────────────────────────────────────── -->
+<!-- ── Reflections Page ───────────────────────────────────── -->
 <div id="page-bookmarks" class="page">
   <div class="bookmarks-header">
-    <div class="bookmarks-title" data-i18n="bookmarks">Bookmarks</div>
+    <div class="bookmarks-title" data-i18n="bookmarks">Reflections</div>
     <div class="bookmarks-subtitle" id="bookmarks-subtitle"></div>
   </div>
   <div id="bookmarks-list"></div>
@@ -154,8 +154,8 @@
   </button>
 
   <button class="bottom-nav-btn" data-page="bookmarks" onclick="showPage('bookmarks')">
-    <span class="bnb-icon">🔖</span>
-    <span class="bnb-label" data-i18n="bookmarks">Bookmarks</span>
+    <span class="bnb-icon">✨</span>
+    <span class="bnb-label" data-i18n="bookmarks">Reflections</span>
   </button>
 </div>
 
@@ -415,16 +415,30 @@
   </div>
 </div>
 
-<!-- ── Bookmark Sheet ────────────────────────────────────── -->
+<!-- ── Reflection Sheet ───────────────────────────────────── -->
 <div id="bookmark-sheet-backdrop" onclick="Bookmarks.closeSheet()"></div>
-<div id="bookmark-sheet" role="dialog" aria-label="Save Bookmark">
+<div id="bookmark-sheet" role="dialog" aria-label="Save Reflection">
   <div class="sheet-handle"></div>
   <div class="sheet-title" id="bookmark-sheet-title"></div>
-  <textarea id="bookmark-note-input" rows="3"
-            placeholder="Add a note… (optional)"></textarea>
+  <textarea id="bookmark-note-input" rows="4"
+            placeholder="Write your reflection…" data-i18n-placeholder="bookmark_note"></textarea>
   <div class="sheet-actions">
     <button class="sheet-cancel-btn" onclick="Bookmarks.closeSheet()" data-i18n="remove">Cancel</button>
-    <button class="sheet-save-btn"   onclick="Bookmarks.saveFromSheet()" data-i18n="save_bookmark">Save Bookmark</button>
+    <button class="sheet-save-btn"   onclick="Bookmarks.saveFromSheet()" data-i18n="save_bookmark">Save Reflection</button>
+  </div>
+</div>
+
+<!-- ── In-App Notification Card ──────────────────────────── -->
+<div id="notif-card-overlay" role="dialog" aria-modal="true" aria-label="Reminder">
+  <div id="notif-card">
+    <div id="notif-card-icon" class="notif-card-icon"></div>
+    <div id="notif-card-arabic" class="notif-card-arabic" lang="ar" dir="rtl"></div>
+    <div id="notif-card-title" class="notif-card-title"></div>
+    <div id="notif-card-body" class="notif-card-body"></div>
+    <div class="notif-card-actions">
+      <button id="notif-card-go-btn" class="notif-card-go-btn"></button>
+      <button id="notif-card-close-btn" class="notif-card-close-btn" data-i18n="remove">Dismiss</button>
+    </div>
   </div>
 </div>
 
@@ -528,6 +542,7 @@
 <script src="js/services/quran-api.js"></script>
 <script src="js/services/offline.js"></script>
 <script src="js/services/notifications.js"></script>
+<script src="js/services/notif-cards.js"></script>
 <script src="js/services/webpush.js"></script>
 <script src="js/core/theme.js"></script>
 <script src="js/core/i18n.js"></script>
