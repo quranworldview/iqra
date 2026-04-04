@@ -26,12 +26,15 @@ const Profile = {
   // Opening the app alone does NOT increment the streak.
   recordReadingSession() {
     const streak   = loadStreak();
-    const today    = new Date().toDateString();
+    const today    = new Date().toISOString().slice(0, 10); // 'YYYY-MM-DD' — matches Firestore format
     const lastDate = streak.lastDate;
 
     if (lastDate === today) return; // already counted today
 
-    const yesterday = new Date(Date.now() - 86400000).toDateString();
+    // Yesterday in YYYY-MM-DD — subtract one full day, take date portion
+    const yesterdayDate = new Date(Date.now() - 86400000);
+    const yesterday     = yesterdayDate.toISOString().slice(0, 10);
+
     const newCount  = lastDate === yesterday ? streak.count + 1 : 1;
     const longest   = Math.max(newCount, streak.longest || 0);
 

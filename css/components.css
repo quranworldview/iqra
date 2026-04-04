@@ -145,17 +145,12 @@ a:hover { color: var(--gold-light); }
 .bottom-nav-btn:hover { color: var(--text-secondary); }
 .bottom-nav-btn.active-page { color: var(--gold); }
 
-.bnb-icon { font-size: 18px; line-height: 1; }
+.bnb-icon { font-size: 20px; line-height: 1; }
 .bnb-label {
-  font-size: 10px;
   font-family: 'Cinzel', serif;
-  letter-spacing: 0.04em;
   text-transform: uppercase;
   line-height: 1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 100%;
+  /* display, font-size, letter-spacing controlled by responsive blocks below */
 }
 
 /* ── Audio bar (reader page only) ────────────────────────── */
@@ -916,16 +911,21 @@ a:hover { color: var(--gold-light); }
   width: 100%;
 }
 
-/* Nav tab buttons — fixed width, never grow, never push audio bar */
+/* Nav tab buttons — icon-only on mobile, icon+label on tablet+ */
 .bottom-nav-btn {
-  flex: 0 0 64px;         /* fixed 64px — icon + label fits, won't crowd */
-  width: 64px;
+  flex: 0 0 52px;
+  width: 52px;
   padding: 8px 4px;
 }
 
-/* Audio bar — takes ALL remaining space between the nav buttons */
+/* Labels hidden by default (mobile-first) */
+.bnb-label {
+  display: none;
+}
+
+/* Audio bar — takes ALL remaining space */
 #audio-bar {
-  flex: 1 1 auto;         /* grow to fill, shrink if needed */
+  flex: 1 1 auto;
   min-width: 0;
   display: flex;
   align-items: center;
@@ -935,25 +935,35 @@ a:hover { color: var(--gold-light); }
   overflow: hidden;
 }
 
-/* Play button — fills audio bar width, never shrinks below readable size */
+/* Play button */
 #play-btn {
   flex: 1 1 auto;
-  min-width: 80px;        /* never narrower than this */
+  min-width: 80px;
   max-width: 200px;
   padding: 10px 14px;
 }
 
-/* Tablet+ — nav buttons slightly wider for comfort */
-@media (min-width: 640px) {
-  .bottom-nav-btn { flex: 0 0 76px; width: 76px; }
-  .bnb-label { font-size: 10px; letter-spacing: 0.05em; }
+/* Tablet (540px+) — show labels, widen buttons */
+@media (min-width: 540px) {
+  .bottom-nav-btn {
+    flex: 0 0 80px;
+    width: 80px;
+  }
+  .bnb-label {
+    display: block;
+    font-size: 9px;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 78px;
+  }
 }
 
-@media (max-width: 360px) {
-  .bottom-nav-btn { flex: 0 0 52px; width: 52px; }
-  #play-btn { padding: 10px 10px; font-size: 11px; }
-  #audio-bar { gap: 4px; }
-  .bnb-label { display: none; }
+/* Desktop (768px+) — more comfortable */
+@media (min-width: 768px) {
+  .bottom-nav-btn { flex: 0 0 90px; width: 90px; }
+  .bnb-label { font-size: 10px; max-width: 88px; }
 }
 
 /* ══════════════════════════════════════════════════════════
