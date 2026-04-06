@@ -10,8 +10,9 @@ const STRINGS = {
   // Settings
   settings:          ['Settings',                    'ترتیبات',                   'सेटिंग्ज़'],
   theme:             ['Theme',                        'تھیم',                      'थीम'],
-  theme_dark:        ['Dark',                        'تاریک',                     'अँधेरा'],
-  theme_light:       ['Light',                       'روشن',                      'रोशन'],
+  theme_system:      ['System',                       'سسٹم',                      'सिस्टम'],
+  theme_dark:        ['Dark',                         'تاریک',                     'अँधेरा'],
+  theme_light:       ['Light',                        'روشن',                      'रोशन'],
   arabic_size:       ['Arabic Size',                 'عربی حجم',                  'अरबी साइज़'],
   trans_size:        ['Translation Size',            'ترجمہ حجم',                 'तर्जुमा साइज़'],
   language:          ['Language',                    'زبان',                      'भाषा'],

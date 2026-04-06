@@ -10,7 +10,7 @@ function _set(key, value) { try { localStorage.setItem(STORE_PREFIX + key, value
 function _del(key)        { try { localStorage.removeItem(STORE_PREFIX + key); } catch(e) {} }
 
 // ── Theme ─────────────────────────────────────────────────
-function loadTheme()           { return _get('theme')        || 'dark'; }
+function loadTheme()           { return _get('theme')        || 'system'; }
 function saveTheme(t)          { _set('theme', t); }
 
 // ── Text sizes ────────────────────────────────────────────

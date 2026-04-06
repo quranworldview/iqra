@@ -87,6 +87,33 @@
   --hatch-line: rgba(100,80,40,0.07);
 }
 
+/* ── System theme — follows OS preference ─────────────────── */
+[data-theme="system"] {
+  /* inherits dark (default :root) — overridden below if OS is light */
+}
+
+@media (prefers-color-scheme: light) {
+  [data-theme="system"] {
+    --bg-base:        #F5F0E8;
+    --bg-surface:     #EDE8DE;
+    --bg-elevated:    #E4DDD0;
+    --border:         rgba(100, 80, 40, 0.18);
+    --border-strong:  rgba(100, 80, 40, 0.38);
+    --gold:           #A0720A;
+    --gold-light:     #B8860B;
+    --gold-dim:       rgba(160, 114, 10, 0.12);
+    --text-primary:   #1A1710;
+    --text-secondary: #4A4438;
+    --text-tertiary:  #8A7A68;
+    --text-arabic:    #0D0B08;
+    --teal:           #2A6060;
+    --teal-light:     #3A7D7B;
+    --shadow-card: 0 4px 24px rgba(0,0,0,0.12);
+    --shadow-glow: 0 0 30px rgba(160,114,10,0.08);
+    --hatch-line: rgba(100,80,40,0.07);
+  }
+}
+
 /* ── Arabic size steps ────────────────────────────────────── */
 [data-arabic-size="xs"] { --sz-arabic: 26px; }
 [data-arabic-size="sm"] { --sz-arabic: 32px; }

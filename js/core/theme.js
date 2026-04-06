@@ -9,10 +9,27 @@ function setTheme(theme) {
   document.querySelectorAll('[data-theme-btn]').forEach(btn => {
     btn.classList.toggle('active', btn.getAttribute('data-theme-btn') === theme);
   });
-  // Swap logos to match theme
-  const logoSrc = theme === 'light' ? 'icons/logo-light.png' : 'icons/logo-dark.png';
+  _applyThemeLogo(theme);
+}
+
+// ── Resolve effective theme (system → dark or light) ─────────
+function _resolveTheme(theme) {
+  if (theme !== 'system') return theme;
+  return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+}
+
+// ── Swap logos to match resolved theme ───────────────────────
+function _applyThemeLogo(theme) {
+  const resolved = _resolveTheme(theme);
+  const logoSrc  = resolved === 'light' ? 'icons/logo-light.png' : 'icons/logo-dark.png';
   document.querySelectorAll('.theme-logo').forEach(img => { img.src = logoSrc; });
 }
+
+// ── Listen for OS theme changes (relevant only in system mode) ─
+const _systemThemeWatcher = window.matchMedia('(prefers-color-scheme: light)');
+_systemThemeWatcher.addEventListener('change', () => {
+  if (loadTheme() === 'system') _applyThemeLogo('system');
+});
 
 function setArabicSize(size) {
   document.documentElement.setAttribute('data-arabic-size', size);
