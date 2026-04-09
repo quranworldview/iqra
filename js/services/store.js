@@ -142,7 +142,12 @@ function saveNotifTime(type, time)  { _set('notif_time_' + type, time); }
 function loadUserName()          { return _get('user_name') || ''; }
 function saveUserName(n)         { _set('user_name', n); }
 
-// Goal: { type: 'surahs'|'juz', count: number, period: 'day'|'week'|'month' }
+// Goal: {
+//   type:        'surahs'|'juz',
+//   count:       number,
+//   period:      'day'|'week'|'month',
+//   daysPerWeek: number (1–7) — habit goal, stored alongside surah milestone
+// }
 function loadUserGoal() {
   try { return JSON.parse(_get('user_goal') || 'null'); } catch(e) { return null; }
 }
@@ -154,6 +159,30 @@ function loadStreak() {
   catch(e) { return { count: 0, longest: 0, lastDate: null }; }
 }
 function saveStreak(s)           { _set('streak', JSON.stringify(s)); }
+
+// ── Al-Mulk streak (nightly) ──────────────────────────────
+// { current: number, longest: number, lastDate: 'YYYY-MM-DD' }
+function loadMulkStreak() {
+  try { return JSON.parse(_get('mulk_streak') || '{"current":0,"longest":0,"lastDate":null}'); }
+  catch(e) { return { current: 0, longest: 0, lastDate: null }; }
+}
+function saveMulkStreak(s) { _set('mulk_streak', JSON.stringify(s)); }
+
+// ── Al-Kahf streak (weekly — Fridays) ────────────────────
+// { current: number, longest: number, lastFriday: 'YYYY-MM-DD' }
+function loadKahfStreak() {
+  try { return JSON.parse(_get('kahf_streak') || '{"current":0,"longest":0,"lastFriday":null}'); }
+  catch(e) { return { current: 0, longest: 0, lastFriday: null }; }
+}
+function saveKahfStreak(s) { _set('kahf_streak', JSON.stringify(s)); }
+
+// ── Sunnah consistency goals ──────────────────────────────
+// { mulkTarget: number, kahfTarget: number }
+function loadSunnahGoals() {
+  try { return JSON.parse(_get('sunnah_goals') || '{"mulkTarget":0,"kahfTarget":0}'); }
+  catch(e) { return { mulkTarget: 0, kahfTarget: 0 }; }
+}
+function saveSunnahGoals(g) { _set('sunnah_goals', JSON.stringify(g)); }
 
 // ── Surah completion timestamps ───────────────────────────
 // Records the FIRST time a surah was fully read (epoch ms).

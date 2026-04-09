@@ -207,6 +207,7 @@
     <div class="profile-greeting" id="profile-greeting">Assalamu Alaikum</div>
 
     <!-- Stats row -->
+    <!-- Reading streak stats -->
     <div class="profile-stats">
       <div class="profile-stat">
         <span class="profile-stat-icon">🔥</span>
@@ -231,26 +232,121 @@
       </div>
     </div>
 
-    <!-- Goal progress -->
+    <!-- Sunnah streaks — Al-Mulk & Al-Kahf -->
+    <div class="profile-sunnah-streaks">
+
+      <!-- Al-Mulk -->
+      <div class="sunnah-streak-card">
+        <div class="sunnah-streak-header">
+          <span class="sunnah-streak-icon">🌙</span>
+          <div class="sunnah-streak-info">
+            <span class="sunnah-streak-title" data-i18n="mulk_streak_label">Al-Mulk Streak</span>
+            <span class="sunnah-streak-sub" data-i18n="mulk_streak_sub">Nights after Isha</span>
+          </div>
+          <div class="sunnah-streak-nums">
+            <span id="profile-mulk-current" class="sunnah-streak-count">0</span>
+            <span class="sunnah-streak-sep">/</span>
+            <span id="profile-mulk-longest" class="sunnah-streak-best">0</span>
+          </div>
+        </div>
+        <div class="sunnah-goal-row">
+          <span class="sunnah-goal-track-wrap">
+            <span class="profile-goal-track sunnah-goal-track">
+              <span class="profile-goal-bar" id="profile-mulk-goal-bar"></span>
+            </span>
+            <span id="profile-mulk-goal-label" class="sunnah-goal-label"></span>
+          </span>
+          <div class="sunnah-goal-input-row">
+            <span data-i18n="mulk_target_label">My goal</span>
+            <input type="number" id="profile-mulk-target" class="profile-number-input-sm"
+                   min="1" max="365" placeholder="—">
+            <span data-i18n="nights">nights</span>
+            <button class="profile-goal-set" onclick="Profile.saveSunnahGoalsUI()">Set</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Al-Kahf -->
+      <div class="sunnah-streak-card">
+        <div class="sunnah-streak-header">
+          <span class="sunnah-streak-icon">🕌</span>
+          <div class="sunnah-streak-info">
+            <span class="sunnah-streak-title" data-i18n="kahf_streak_label">Al-Kahf Streak</span>
+            <span class="sunnah-streak-sub" data-i18n="kahf_streak_sub">Consecutive Fridays</span>
+          </div>
+          <div class="sunnah-streak-nums">
+            <span id="profile-kahf-current" class="sunnah-streak-count">0</span>
+            <span class="sunnah-streak-sep">/</span>
+            <span id="profile-kahf-longest" class="sunnah-streak-best">0</span>
+          </div>
+        </div>
+        <div class="sunnah-goal-row">
+          <span class="sunnah-goal-track-wrap">
+            <span class="profile-goal-track sunnah-goal-track">
+              <span class="profile-goal-bar" id="profile-kahf-goal-bar"></span>
+            </span>
+            <span id="profile-kahf-goal-label" class="sunnah-goal-label"></span>
+          </span>
+          <div class="sunnah-goal-input-row">
+            <span data-i18n="kahf_target_label">My goal</span>
+            <input type="number" id="profile-kahf-target" class="profile-number-input-sm"
+                   min="1" max="52" placeholder="—">
+            <span data-i18n="fridays">Fridays</span>
+            <button class="profile-goal-set" onclick="Profile.saveSunnahGoalsUI()">Set</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Reading Goal — toggle between habit (days/week) and milestone (surahs) -->
     <div class="profile-goal-section">
-      <div class="profile-goal-header">
+
+      <!-- Toggle tabs -->
+      <div class="goal-type-toggle">
+        <button class="goal-type-btn active" id="goal-tab-habit"
+                onclick="Profile.switchGoalTab('habit')" data-i18n="habit_goal">Habit Goal</button>
+        <button class="goal-type-btn" id="goal-tab-surahs"
+                onclick="Profile.switchGoalTab('surahs')" data-i18n="reading_goal">Reading Goal</button>
+      </div>
+
+      <!-- Habit panel: days per week -->
+      <div id="goal-panel-habit" class="goal-panel">
         <div class="profile-goal-input-compact">
-          <input type="number" id="profile-goal-count" class="profile-number-input-sm"
-                 min="1" max="114" value="5">
-          <span class="profile-goal-sep" data-i18n="surahs_goal">surahs</span>
-          <select id="profile-goal-period" class="profile-select-sm">
-            <option value="day" data-i18n="per_day">/ day</option>
-            <option value="week" selected data-i18n="per_week">/ week</option>
-            <option value="month" data-i18n="per_month">/ month</option>
-          </select>
+          <span data-i18n="habit_goal_label">I will read</span>
+          <input type="number" id="profile-days-per-week" class="profile-number-input-sm"
+                 min="1" max="7" value="5">
+          <span data-i18n="days_per_week">days a week</span>
           <button class="profile-goal-set" onclick="Profile.saveGoal()">Set</button>
         </div>
-        <span id="profile-goal-badge" class="profile-goal-badge" style="display:none">🏅</span>
+        <div class="profile-goal-track" id="habit-goal-track" style="display:none">
+          <div class="profile-goal-bar" id="profile-habit-bar"></div>
+        </div>
+        <span id="profile-habit-label" class="profile-goal-label"></span>
       </div>
-      <div class="profile-goal-track">
-        <div class="profile-goal-bar" id="profile-goal-bar"></div>
+
+      <!-- Surahs panel: milestone -->
+      <div id="goal-panel-surahs" class="goal-panel" style="display:none">
+        <div class="profile-goal-header">
+          <div class="profile-goal-input-compact">
+            <input type="number" id="profile-goal-count" class="profile-number-input-sm"
+                   min="1" max="114" value="5">
+            <span class="profile-goal-sep" data-i18n="surahs_goal">surahs</span>
+            <select id="profile-goal-period" class="profile-select-sm">
+              <option value="day" data-i18n="per_day">/ day</option>
+              <option value="week" selected data-i18n="per_week">/ week</option>
+              <option value="month" data-i18n="per_month">/ month</option>
+            </select>
+            <button class="profile-goal-set" onclick="Profile.saveGoal()">Set</button>
+          </div>
+          <span id="profile-goal-badge" class="profile-goal-badge" style="display:none">🏅</span>
+        </div>
+        <div class="profile-goal-track">
+          <div class="profile-goal-bar" id="profile-goal-bar"></div>
+        </div>
+        <span id="profile-goal-label" class="profile-goal-label"></span>
       </div>
-      <span id="profile-goal-label" class="profile-goal-label"></span>
+
     </div>
 
     <!-- Achievements -->
@@ -508,17 +604,40 @@
 
     <div class="setup-field">
       <div class="settings-section-title" data-i18n="reading_goal">Reading Goal</div>
-      <div class="profile-goal-input-row">
-        <span data-i18n="setup_goal_label">I want to read</span>
-        <input type="number" id="setup-goal-count" class="profile-number-input"
-               min="1" max="114" value="5">
-        <span data-i18n="surahs_goal">surahs</span>
-        <select id="setup-goal-period" class="profile-select">
-          <option value="day" data-i18n="per_day">per day</option>
-          <option value="week" selected data-i18n="per_week">per week</option>
-          <option value="month" data-i18n="per_month">per month</option>
-        </select>
+
+      <!-- Toggle -->
+      <div class="goal-type-toggle goal-type-toggle-setup">
+        <button class="goal-type-btn active" id="setup-goal-tab-habit"
+                onclick="Profile.switchSetupGoalTab('habit')" data-i18n="habit_goal">Habit Goal</button>
+        <button class="goal-type-btn" id="setup-goal-tab-surahs"
+                onclick="Profile.switchSetupGoalTab('surahs')" data-i18n="reading_goal">Reading Goal</button>
       </div>
+
+      <!-- Habit panel -->
+      <div id="setup-goal-panel-habit" class="goal-panel">
+        <div class="profile-goal-input-row">
+          <span data-i18n="habit_goal_label">I will read</span>
+          <input type="number" id="setup-days-per-week" class="profile-number-input"
+                 min="1" max="7" value="5">
+          <span data-i18n="days_per_week">days a week</span>
+        </div>
+      </div>
+
+      <!-- Surahs panel -->
+      <div id="setup-goal-panel-surahs" class="goal-panel" style="display:none">
+        <div class="profile-goal-input-row">
+          <span data-i18n="setup_goal_label">I want to read</span>
+          <input type="number" id="setup-goal-count" class="profile-number-input"
+                 min="1" max="114" value="5">
+          <span data-i18n="surahs_goal">surahs</span>
+          <select id="setup-goal-period" class="profile-select">
+            <option value="day" data-i18n="per_day">per day</option>
+            <option value="week" selected data-i18n="per_week">per week</option>
+            <option value="month" data-i18n="per_month">per month</option>
+          </select>
+        </div>
+      </div>
+
     </div>
 
     <button class="setup-start-btn" onclick="Profile.saveSetup()" data-i18n="setup_btn">Get Started</button>

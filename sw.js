@@ -12,7 +12,7 @@
 //   Audio MP3s  → Cache First (replay without re-downloading)
 // ============================================================
 
-const APP_VERSION = 'iqra-v7.9.1';
+const APP_VERSION = 'iqra-v8.0';
 const SHELL_CACHE = APP_VERSION + '-shell';
 const API_CACHE   = APP_VERSION + '-api';
 const AUDIO_CACHE = APP_VERSION + '-audio';

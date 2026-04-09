@@ -65,13 +65,61 @@ const Progress = {
     await db.collection(COLLECTIONS.IQRA_PROGRESS).doc(this.uid)
       .set({
         reading_goal: {
-          type:       goal.type,
-          count:      goal.count,
-          start_date: new Date().toISOString().slice(0, 10),
+          type:         goal.type,
+          count:        goal.count,
+          start_date:   new Date().toISOString().slice(0, 10),
+          days_per_week: goal.daysPerWeek || 0,
         },
         updated_at: firebase.firestore.FieldValue.serverTimestamp(),
       }, { merge: true })
       .catch(e => console.warn('[Iqra progress] goal write failed:', e));
+  },
+
+  // ── Save Al-Mulk streak ───────────────────────────────────
+  async saveMulkStreak(streakObj) {
+    saveMulkStreak(streakObj); // localStorage always
+    if (!this.uid) return;
+    await db.collection(COLLECTIONS.IQRA_PROGRESS).doc(this.uid)
+      .set({
+        mulk_streak: {
+          current:  streakObj.current  || 0,
+          longest:  streakObj.longest  || 0,
+          last_date: streakObj.lastDate || null,
+        },
+        updated_at: firebase.firestore.FieldValue.serverTimestamp(),
+      }, { merge: true })
+      .catch(e => console.warn('[Iqra progress] mulk streak write failed:', e));
+  },
+
+  // ── Save Al-Kahf streak ───────────────────────────────────
+  async saveKahfStreak(streakObj) {
+    saveKahfStreak(streakObj); // localStorage always
+    if (!this.uid) return;
+    await db.collection(COLLECTIONS.IQRA_PROGRESS).doc(this.uid)
+      .set({
+        kahf_streak: {
+          current:     streakObj.current     || 0,
+          longest:     streakObj.longest     || 0,
+          last_friday: streakObj.lastFriday  || null,
+        },
+        updated_at: firebase.firestore.FieldValue.serverTimestamp(),
+      }, { merge: true })
+      .catch(e => console.warn('[Iqra progress] kahf streak write failed:', e));
+  },
+
+  // ── Save Sunnah goals ─────────────────────────────────────
+  async saveSunnahGoals(goals) {
+    saveSunnahGoals(goals); // localStorage always
+    if (!this.uid) return;
+    await db.collection(COLLECTIONS.IQRA_PROGRESS).doc(this.uid)
+      .set({
+        sunnah_goals: {
+          mulk_target: goals.mulkTarget || 0,
+          kahf_target: goals.kahfTarget || 0,
+        },
+        updated_at: firebase.firestore.FieldValue.serverTimestamp(),
+      }, { merge: true })
+      .catch(e => console.warn('[Iqra progress] sunnah goals write failed:', e));
   },
 
   // ── Save settings ─────────────────────────────────────────
@@ -346,9 +394,44 @@ const Progress = {
         // Reading goal
         if (d.reading_goal && !loadUserGoal()) {
           saveUserGoal({
-            type:   d.reading_goal.type  || 'surahs',
-            count:  d.reading_goal.count || 5,
-            period: 'week',
+            type:        d.reading_goal.type       || 'surahs',
+            count:       d.reading_goal.count      || 5,
+            period:      'week',
+            daysPerWeek: d.reading_goal.days_per_week || 0,
+          });
+        }
+
+        // Mulk streak
+        if (d.mulk_streak) {
+          const local = loadMulkStreak();
+          const remote = {
+            current:  d.mulk_streak.current  || 0,
+            longest:  d.mulk_streak.longest  || 0,
+            lastDate: d.mulk_streak.last_date || null,
+          };
+          if (remote.longest > local.longest || remote.current > local.current) {
+            saveMulkStreak(remote);
+          }
+        }
+
+        // Kahf streak
+        if (d.kahf_streak) {
+          const local = loadKahfStreak();
+          const remote = {
+            current:    d.kahf_streak.current     || 0,
+            longest:    d.kahf_streak.longest     || 0,
+            lastFriday: d.kahf_streak.last_friday || null,
+          };
+          if (remote.longest > local.longest || remote.current > local.current) {
+            saveKahfStreak(remote);
+          }
+        }
+
+        // Sunnah goals
+        if (d.sunnah_goals) {
+          saveSunnahGoals({
+            mulkTarget: d.sunnah_goals.mulk_target || 0,
+            kahfTarget: d.sunnah_goals.kahf_target || 0,
           });
         }
 
@@ -384,6 +467,9 @@ const Progress = {
       const completed = getCompletedSurahs();
       const achievements = loadAchievements().map(a => a.id);
       const goal = loadUserGoal();
+      const mulkStreak = loadMulkStreak();
+      const kahfStreak = loadKahfStreak();
+      const sunnahGoals = loadSunnahGoals();
 
       await db.collection(COLLECTIONS.IQRA_PROGRESS).doc(uid).set({
         current_streak: streak.count    || 0,
@@ -394,10 +480,25 @@ const Progress = {
         khatm_history:  [],
         achievements:   achievements,
         favourites:     loadFavourites(),
+        mulk_streak: {
+          current:   mulkStreak.current  || 0,
+          longest:   mulkStreak.longest  || 0,
+          last_date: mulkStreak.lastDate || null,
+        },
+        kahf_streak: {
+          current:     kahfStreak.current    || 0,
+          longest:     kahfStreak.longest    || 0,
+          last_friday: kahfStreak.lastFriday || null,
+        },
+        sunnah_goals: {
+          mulk_target: sunnahGoals.mulkTarget || 0,
+          kahf_target: sunnahGoals.kahfTarget || 0,
+        },
         reading_goal: goal ? {
-          type:       goal.type,
-          count:      goal.count,
-          start_date: new Date().toISOString().slice(0, 10),
+          type:          goal.type,
+          count:         goal.count,
+          start_date:    new Date().toISOString().slice(0, 10),
+          days_per_week: goal.daysPerWeek || 0,
         } : null,
         settings: {
           reciter:          loadReciter(),
